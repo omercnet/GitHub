@@ -22,6 +22,7 @@ const customJestConfig = {
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
     '<rootDir>/app/api/__tests__/utils/',
+    '<rootDir>/tests/e2e/', // Exclude Playwright tests
   ],
   transformIgnorePatterns: [
     'node_modules/(?!(@octokit|universal-user-agent|before-after-hook|deprecation|uncrypto|iron-session)/)'
