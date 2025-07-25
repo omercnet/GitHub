@@ -1,0 +1,17 @@
+# Code owners for the GitHub UI Clone project
+# These individuals will be automatically requested for review on PRs
+
+# Global owners
+* @omercnet
+
+# GitHub Actions workflows
+/.github/ @omercnet
+
+# Application code
+/app/ @omercnet
+
+# Configuration files
+package.json @omercnet
+tsconfig.json @omercnet
+next.config.js @omercnet
+tailwind.config.js @omercnet

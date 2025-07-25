@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run ESLint
+      run: npm run lint
+
+    - name: Build application
+      run: npm run build
+      env:
+        SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD || 'test-secret-key-for-ci-that-is-32-characters-long' }}
+
+    - name: Check build artifacts
+      run: |
+        if [ ! -d ".next" ]; then
+          echo "Build failed - .next directory not found"
+          exit 1
+        fi
+        echo "Build successful - .next directory exists"

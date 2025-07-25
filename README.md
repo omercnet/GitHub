@@ -146,6 +146,92 @@ The application is compatible with any platform supporting Next.js 15:
 - All GitHub API calls are proxied server-side to prevent token exposure
 - Consider using fine-grained personal access tokens for enhanced security
 
+## GitHub Actions Workflows
+
+This project uses GitHub Actions for continuous integration, code quality checks, security auditing, and automated deployment. The workflows follow best practices and use popular marketplace actions.
+
+### Available Workflows
+
+#### 1. CI Workflow (`.github/workflows/ci.yml`)
+- **Triggers**: Push to main, Pull requests to main
+- **Node.js Versions**: Tests on both Node.js 18.x and 20.x
+- **Actions Used**:
+  - `actions/checkout@v4` - Checkout repository code
+  - `actions/setup-node@v4` - Setup Node.js with caching
+- **Steps**:
+  - Install dependencies with `npm ci`
+  - Run ESLint linting
+  - Build Next.js application
+  - Verify build artifacts
+
+#### 2. Code Quality Workflow (`.github/workflows/code-quality.yml`)
+- **Triggers**: Pull requests to main
+- **Features**:
+  - **Reviewdog ESLint**: Automated code review with inline comments
+  - **TypeScript Type Checking**: Ensures type safety across the codebase
+- **Actions Used**:
+  - `reviewdog/action-eslint@v1` - ESLint with automated review comments
+  - Standard Node.js setup actions
+
+#### 3. Security Audit Workflow (`.github/workflows/security.yml`)
+- **Triggers**: 
+  - Weekly schedule (Mondays at 9 AM UTC)
+  - Push to main
+  - Pull requests to main
+- **Features**:
+  - **npm audit**: Checks for known vulnerabilities in dependencies
+  - **Dependency Review**: Reviews new dependencies in pull requests
+- **Actions Used**:
+  - `actions/dependency-review-action@v4` - GitHub's dependency review
+
+#### 4. Deploy to Vercel Workflow (`.github/workflows/deploy.yml`)
+- **Triggers**: Push to main, Manual dispatch
+- **Features**:
+  - Pre-deployment testing (lint, type-check, build)
+  - Automated Vercel deployment for main branch
+- **Actions Used**:
+  - `amondnet/vercel-action@v25` - Vercel deployment action
+- **Required Secrets**:
+  - `VERCEL_TOKEN` - Vercel deployment token
+  - `VERCEL_ORG_ID` - Your Vercel organization ID
+  - `VERCEL_PROJECT_ID` - Your Vercel project ID
+  - `SECRET_COOKIE_PASSWORD` - Application secret key
+
+### Setting Up GitHub Actions
+
+#### Required Secrets
+To enable all workflows, add these secrets in your GitHub repository settings:
+
+1. **For Deployment** (optional):
+   ```
+   VERCEL_TOKEN=your_vercel_token
+   VERCEL_ORG_ID=your_vercel_org_id
+   VERCEL_PROJECT_ID=your_vercel_project_id
+   ```
+
+2. **For Application**:
+   ```
+   SECRET_COOKIE_PASSWORD=your_32_character_or_longer_secret_key
+   ```
+
+#### Workflow Features
+
+- **Parallel Testing**: CI workflow tests on multiple Node.js versions
+- **Smart Caching**: npm dependencies are cached for faster builds
+- **Fail Fast**: Workflows stop early on critical failures
+- **Security First**: Regular vulnerability scans and dependency reviews
+- **Code Quality**: Automated ESLint reviews with reviewdog
+- **Type Safety**: TypeScript compilation checks on every PR
+
+#### Customization
+
+The workflows are designed to be easily customizable:
+
+- **Node.js Versions**: Modify the matrix strategy in `ci.yml`
+- **ESLint Rules**: Adjust `eslint_flags` in `code-quality.yml`
+- **Security Schedule**: Change the cron schedule in `security.yml`
+- **Deployment Target**: Replace Vercel action with your preferred platform
+
 ## Contributing
 
 1. Fork the repository
