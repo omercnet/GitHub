@@ -53,9 +53,9 @@ describe('Integration Test Infrastructure', () => {
     console.log(`   - Test command: npm test`)
     console.log(`   - Ready for GitHub Actions: ✅`)
     
-    expect(TEST_USER).toBe('omercbot')
+    expect(TEST_USER).toBe('omercnet')
     expect(TEST_OWNER).toBe('omercnet')
-    expect(TEST_REPO).toBe('omercnet/GitHub')
+    expect(TEST_REPO).toBe('GitHub')
   })
 
   it('should validate test file structure', () => {

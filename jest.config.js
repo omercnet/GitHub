@@ -25,7 +25,7 @@ const customJestConfig = {
     '<rootDir>/tests/e2e/', // Exclude Playwright tests
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!(@octokit|universal-user-agent|before-after-hook|deprecation|uncrypto|iron-session)/)'
+    '/node_modules/(?!(@octokit|universal-user-agent|before-after-hook|deprecation|node-fetch|fetch-blob|formdata-polyfill|web-streams-polyfill)/)'
   ],
 }
 
