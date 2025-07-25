@@ -4,7 +4,7 @@
 
 export const TEST_USER = 'omercbot' // The authenticated user (token holder)
 export const TEST_OWNER = 'omercnet' // The repository owner
-export const TEST_REPO = 'GitHub'
+export const TEST_REPO = 'omercnet/GitHub' // Full repository name
 
 /**
  * Check if provided token appears to be a real GitHub token

@@ -47,7 +47,7 @@ describe('Integration Test Infrastructure', () => {
   it('should be ready for CI/CD integration', () => {
     console.log(`🚀 CI/CD Integration Status:`)
     console.log(`   - Authenticated User: ${TEST_USER}`)
-    console.log(`   - Repository: ${TEST_OWNER}/${TEST_REPO}`)
+    console.log(`   - Repository: ${TEST_REPO}`)
     console.log(`   - Secret name: TEST_TOKEN`)
     console.log(`   - Test framework: Jest`)
     console.log(`   - Test command: npm test`)
@@ -55,7 +55,7 @@ describe('Integration Test Infrastructure', () => {
     
     expect(TEST_USER).toBe('omercbot')
     expect(TEST_OWNER).toBe('omercnet')
-    expect(TEST_REPO).toBe('GitHub')
+    expect(TEST_REPO).toBe('omercnet/GitHub')
   })
 
   it('should validate test file structure', () => {
