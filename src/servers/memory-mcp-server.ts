@@ -648,7 +648,7 @@ export class MemorySequentialThinkingServer implements MCPServer {
     return sum / items.length;
   }
 
-  private async analyzeThoughtPatterns(args: any) {
+  private async analyzeThoughtPatterns(_args: any) {
     const patterns = {
       mostCommonStepTypes: this.analyzeMostCommonStepTypes(),
       averageProcessLength: this.calculateAverageProcessLength(),

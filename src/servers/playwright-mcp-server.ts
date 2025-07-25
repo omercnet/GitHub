@@ -8,8 +8,8 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { chromium, Browser, BrowserContext, Page } from 'playwright';
 import { MCPServer, MCPTool, PlaywrightConfig } from '../types/index.js';
-import { MCPLogger, createToolResponse, validateToolArguments, formatError, withTimeout } from '../utils/common.js';
-import { writeFile, mkdir } from 'fs/promises';
+import { MCPLogger, createToolResponse, validateToolArguments, formatError } from '../utils/common.js';
+import { mkdir } from 'fs/promises';
 import { join } from 'path';
 
 export class PlaywrightMCPServer implements MCPServer {

@@ -1,4 +1,4 @@
-import { MCPTool, ToolResponse, ServerConfig } from '../types/index.js';
+import { MCPTool, ServerConfig } from '../types/index.js';
 
 export class MCPLogger {
   private prefix: string;
@@ -114,8 +114,8 @@ export function parseEnvBool(value: string | undefined, defaultValue = false): b
   return ['true', '1', 'yes', 'on'].includes(value.toLowerCase());
 }
 
-export function parseEnvInt(value: string | undefined, defaultValue: number): number {
-  if (!value) return defaultValue;
-  const parsed = parseInt(value, 10);
+export function parseEnvInt(envValue: string | undefined, defaultValue: number): number {
+  if (!envValue) return defaultValue;
+  const parsed = parseInt(envValue, 10);
   return isNaN(parsed) ? defaultValue : parsed;
 }
