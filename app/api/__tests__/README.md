@@ -1,183 +1,254 @@
-# API Integration Tests
+# GitHub API Integration Tests
 
-This directory contains comprehensive integration tests for all GitHub API routes in the application.
+This directory contains comprehensive integration tests for all GitHub API routes implemented in this application.
 
 ## Overview
 
-The integration tests validate that all API endpoints work correctly with real GitHub authentication and data. Tests are designed to run both locally and in CI/CD environments.
+The integration tests validate API endpoints against live GitHub data using real authentication tokens when available. Tests are designed to run in two modes:
+
+1. **Structure & Unit Tests** - Run without `TEST_TOKEN` (validates code structure, mocking, error handling)
+2. **Real API Integration** - Run with `TEST_TOKEN` (validates against live GitHub API)
 
 ## Test Structure
 
-### Files
-- `integration.test.ts` - Main integration test suite
-- `helpers.test.ts` - API helper function tests
+The integration tests are split into focused, functional test files for better maintainability:
 
-### Test Categories
-
-1. **API Route Structure Validation**
-   - Verifies all required route files exist
-   - Checks correct HTTP method exports
-   - Validates dependency imports
-
-2. **Authentication Flow Testing**
-   - Valid/invalid token handling
-   - Missing credential scenarios
-   - Session management
-
-3. **Repository API Testing**
-   - User repositories endpoint
-   - Organizations endpoint
-   - Authentication requirement validation
-
-4. **Specific Repository Routes**
-   - Pull requests (GET/POST)
-   - Actions/workflows
-   - Repository contents
-   - Repository status
-
-5. **Error Handling**
-   - GitHub API errors
-   - Network failures
-   - Malformed requests
-
-6. **Real GitHub API Integration**
-   - Live API validation (with TEST_TOKEN)
-   - Authentication against real GitHub API as **omercbot** user
-   - Repository data fetching from **omercnet/GitHub** repository
-   - Organization listing for omercbot account  
-   - Pull requests from omercnet/GitHub repository
-   - **Workflow runs and actions testing** (validates existing CI/Code Quality/Security workflows)
-   - Repository contents and status validation
-   - End-to-end route testing with real session tokens
-
-## Running Tests
-
-### Local Development
-
-```bash
-# Run all tests
-npm test
-
-# Run only integration tests
-npm test -- app/api/__tests__/integration.test.ts
-
-# Run with real GitHub token (for integration testing)
-TEST_TOKEN=your_github_token npm test -- app/api/__tests__/integration.test.ts
 ```
-
-### CI/CD Integration
-
-The tests automatically detect the presence of `TEST_TOKEN` environment variable:
-
-- **Without TEST_TOKEN**: Runs structure and unit tests (17 tests)
-- **With TEST_TOKEN**: Runs all tests including real API calls (26 tests total, including 9 real API integration tests)
+app/api/__tests__/
+├── utils/
+│   └── test-helpers.ts          # Shared test utilities and helpers
+├── structure.integration.test.ts    # API route structure validation
+├── auth.integration.test.ts         # Authentication flow tests
+├── repos.integration.test.ts        # Repository API tests
+├── orgs.integration.test.ts         # Organization API tests
+├── pulls.integration.test.ts        # Pull request API tests
+├── actions.integration.test.ts      # GitHub Actions/workflows tests
+├── contents.integration.test.ts     # Repository contents tests
+├── status.integration.test.ts       # Repository status tests
+├── infrastructure.integration.test.ts # Test infrastructure validation
+└── README.md                        # This documentation
+```
 
 ## Test Configuration
 
 ### Environment Variables
 
 - `TEST_TOKEN` - GitHub personal access token for real API testing
-- `SECRET_COOKIE_PASSWORD` - Session encryption password (automatically set)
-- `NODE_ENV` - Test environment (automatically set to 'test')
+  - **Required for real API tests**
+  - Should have repo access to `omercnet/GitHub`
+  - User: `omercbot` (authenticated user)
+  - Target: `omercnet/GitHub` (repository being tested)
 
-### Required Permissions
+### Test Execution Modes
 
-The `TEST_TOKEN` should be a GitHub personal access token for the **omercbot** user with these permissions:
-- `repo` - Repository access (to access omercnet/GitHub repository)
-- `read:org` - Organization membership
-- `read:user` - User profile information
+```bash
+# Without TEST_TOKEN (structure & unit tests only)
+npm test
 
-**Note**: The token belongs to the `omercbot` user but needs access to the `omercnet/GitHub` repository for testing.
+# With TEST_TOKEN (full integration with real GitHub API)
+TEST_TOKEN=your_github_token npm test
+
+# Run specific test file
+npm test -- app/api/__tests__/repos.integration.test.ts
+
+# Run all integration tests
+npm test -- app/api/__tests__/*.integration.test.ts
+```
 
 ## API Routes Tested
 
-| Route | Method | Description |
-|-------|---------|-------------|
-| `/api/login` | POST | GitHub authentication |
-| `/api/repos` | GET | User repositories |
-| `/api/orgs` | GET | User organizations |
-| `/api/repos/[owner]/[repo]/pulls` | GET | Repository pull requests |
-| `/api/repos/[owner]/[repo]/pulls` | POST | Create pull request |
-| `/api/repos/[owner]/[repo]/actions` | GET | Workflow runs |
-| `/api/repos/[owner]/[repo]/contents` | GET | Repository contents |
-| `/api/repos/[owner]/[repo]/status` | GET | Repository status |
+### Authentication (`auth.integration.test.ts`)
+- `POST /api/login` - GitHub authentication flow
+- Real GitHub API user validation
+- Token format and validity checks
 
-## GitHub Actions Setup
+### Repository Management (`repos.integration.test.ts`)
+- `GET /api/repos` - User repositories (personal and organization)
+- Repository permissions and access validation
+- Real repository data from `omercnet/GitHub`
 
-Example workflow configuration:
+### Organization Management (`orgs.integration.test.ts`)
+- `GET /api/orgs` - User organizations
+- Organization membership validation
+- Public/private organization access
+
+### Pull Requests (`pulls.integration.test.ts`)
+- `GET /api/repos/[owner]/[repo]/pulls` - Pull requests listing
+- `POST /api/repos/[owner]/[repo]/pulls` - Pull request creation
+- Pull request permissions and structure validation
+
+### GitHub Actions (`actions.integration.test.ts`)
+- `GET /api/repos/[owner]/[repo]/actions` - Workflow runs
+- Workflow structure and permissions
+- Real workflow run validation from existing actions
+
+### Repository Contents (`contents.integration.test.ts`)
+- `GET /api/repos/[owner]/[repo]/contents` - Repository contents
+- File and directory structure validation
+- Repository tree and commit access
+
+### Repository Status (`status.integration.test.ts`)
+- `GET /api/repos/[owner]/[repo]/status` - Repository status
+- Repository health and statistics
+- Branch protection and activity validation
+
+### Infrastructure (`infrastructure.integration.test.ts`)
+- Test environment configuration
+- Token validation logic
+- CI/CD readiness checks
+- Test file structure validation
+
+## Test Categories
+
+### 1. Structure Validation (`structure.integration.test.ts`)
+- API route file existence
+- HTTP method exports
+- Required dependencies
+
+### 2. Authentication Flow (`auth.integration.test.ts`)
+- Token validation and format checking
+- Session management  
+- Real GitHub API authentication
+
+### 3. Repository Operations (`repos.integration.test.ts`)
+- Repository listing and access
+- Permission validation
+- Real repository data validation
+
+### 4. Organization Operations (`orgs.integration.test.ts`)
+- Organization membership
+- Public/private access
+- User organization listing
+
+### 5. Pull Request Management (`pulls.integration.test.ts`)
+- Pull request CRUD operations
+- PR permissions and validation
+- Real PR data from target repository
+
+### 6. Actions/Workflows (`actions.integration.test.ts`)
+- Workflow run access
+- Actions permissions
+- Real workflow validation
+
+### 7. Content Management (`contents.integration.test.ts`)
+- File and directory access
+- Repository tree navigation
+- Content permissions
+
+### 8. Repository Status (`status.integration.test.ts`)
+- Repository health metrics
+- Activity and statistics
+- Branch and protection status
+
+### 9. Test Infrastructure (`infrastructure.integration.test.ts`)
+- Environment validation
+- Token format checking
+- CI/CD configuration
+- Test coverage validation
+
+## Shared Utilities
+
+### `utils/test-helpers.ts`
+
+Provides common functionality:
+- `getTestConfig()` - Get test configuration and token validation
+- `isRealGitHubToken()` - Validate GitHub token format
+- `createConditionalDescribe()` - Skip tests without real tokens
+- `createGitHubClient()` - Create HTTP client for GitHub API
+- `createMockSession()` - Create mock session for testing
+- `createMockRequest()` - Create mock Next.js request
+
+## CI/CD Integration
+
+### GitHub Actions
+
+The tests are configured to run in GitHub Actions with the `TEST_TOKEN` secret:
 
 ```yaml
-- name: Run integration tests with real GitHub API
-  run: npm test -- app/api/__tests__/integration.test.ts
+- name: Run integration tests
+  run: npm test -- app/api/__tests__/*.integration.test.ts
   env:
     TEST_TOKEN: ${{ secrets.TEST_TOKEN }}
 ```
 
-### Setting up TEST_TOKEN Secret
+### Expected Results
 
-1. Go to repository Settings → Secrets and variables → Actions
-2. Click "New repository secret"
-3. Name: `TEST_TOKEN`
-4. Value: **omercbot** user's GitHub personal access token with access to omercnet/GitHub
-5. Click "Add secret"
+| Test Mode | Without TOKEN | With TOKEN |
+|-----------|---------------|------------|
+| Structure Tests | ✅ Pass | ✅ Pass |
+| Unit Tests | ✅ Pass | ✅ Pass |
+| Real API Tests | ⏭️ Skip | ✅ Pass |
+| **Total** | **~30 pass, ~20 skip** | **~50 pass** |
 
-## Test Output
+## Setup Instructions
 
-### Without TEST_TOKEN
+### 1. Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run all tests (structure tests only without token)
+npm test
+
+# Run specific test category
+npm test -- app/api/__tests__/repos.integration.test.ts
+
+# Run with real GitHub API (requires token)
+TEST_TOKEN=ghp_your_token_here npm test
 ```
-✓ API Route Structure Validation (3 tests)
-✓ Authentication Flow Testing (3 tests)
-✓ Repository API Testing (3 tests)
-✓ Specific Repository Routes Testing (3 tests)
-✓ Error Handling (2 tests)
-○ Real GitHub API Integration (9 tests skipped)
-✓ Integration Test Infrastructure (3 tests)
 
-Total: 17 passed, 9 skipped
-```
+### 2. GitHub Actions Setup
 
-### With TEST_TOKEN
-```
-✓ API Route Structure Validation (3 tests)
-✓ Authentication Flow Testing (3 tests)
-✓ Repository API Testing (3 tests)
-✓ Specific Repository Routes Testing (3 tests)
-✓ Error Handling (2 tests)
-✓ Real GitHub API Integration (9 tests including workflow runs)
-✓ Integration Test Infrastructure (3 tests)
+1. Add `TEST_TOKEN` to repository secrets
+2. Ensure token has access to `omercnet/GitHub` repository
+3. Token should be associated with `omercbot` user
 
-Total: 26 passed
-```
+### 3. Token Requirements
+
+The `TEST_TOKEN` should have:
+- `repo` scope for repository access
+- `read:org` scope for organization data
+- `workflow` scope for Actions access
+
+## Test Data
+
+All real API tests target:
+- **Repository**: `omercnet/GitHub`
+- **Authenticated User**: `omercbot`
+- **Organization**: `omercnet`
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Tests fail with "401 Unauthorized"**
-   - Check TEST_TOKEN is valid and has required permissions
-   - Verify token hasn't expired
-
-2. **Tests fail with "404 Not Found"**
-   - Normal for test repository access - tests handle this gracefully
-   - Check repository owner/name configuration
-
-3. **Rate limiting errors**
-   - Tests include rate limit handling
-   - Consider using a dedicated testing token
+1. **401 Unauthorized**: Check token validity and permissions
+2. **404 Not Found**: Verify repository access and existence
+3. **Rate Limiting**: GitHub API has rate limits for authenticated requests
+4. **Network Errors**: Check internet connectivity and GitHub API status
+5. **Token Format**: Ensure token starts with valid GitHub prefix (ghp_, github_pat_, etc.)
 
 ### Debug Mode
 
-Enable verbose logging:
-
+Enable verbose logging by setting:
 ```bash
-DEBUG=1 npm test -- app/api/__tests__/integration.test.ts
+DEBUG=true TEST_TOKEN=your_token npm test
 ```
 
 ## Contributing
 
 When adding new API routes:
 
-1. Add route file validation to structure tests
-2. Add authentication tests if route requires auth
-3. Add success/error scenario tests
-4. Update this README with new route information
+1. Create or update the appropriate test file in the modular structure
+2. Add route tests with both structure validation and real API tests
+3. Use shared utilities from `utils/test-helpers.ts`
+4. Update this README with new route documentation
+5. Ensure tests work both with and without `TEST_TOKEN`
+
+## Security Notes
+
+- Never commit real tokens to source code
+- Use GitHub secrets for CI/CD token storage
+- Test tokens should have minimal required permissions
+- Regularly rotate test tokens for security
+- Token validation logic prevents dummy tokens from reaching real API

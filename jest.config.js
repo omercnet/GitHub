@@ -21,6 +21,7 @@ const customJestConfig = {
   testPathIgnorePatterns: [
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
+    '<rootDir>/app/api/__tests__/utils/',
   ],
   transformIgnorePatterns: [
     'node_modules/(?!(@octokit|universal-user-agent|before-after-hook|deprecation|uncrypto)/)'
