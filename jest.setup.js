@@ -26,6 +26,7 @@ jest.mock('next/dynamic', () => () => {
 })
 
 // Mock Next.js headers function for API routes
+// We'll override this in individual tests when we need real session handling
 jest.mock('next/headers', () => ({
   cookies: jest.fn().mockResolvedValue({
     get: jest.fn(),

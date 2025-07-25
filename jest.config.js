@@ -24,7 +24,7 @@ const customJestConfig = {
     '<rootDir>/app/api/__tests__/utils/',
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!(@octokit|universal-user-agent|before-after-hook|deprecation|uncrypto)/)'
+    'node_modules/(?!(@octokit|universal-user-agent|before-after-hook|deprecation|uncrypto|iron-session)/)'
   ],
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   globals: {
