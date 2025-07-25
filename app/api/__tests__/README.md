@@ -42,9 +42,9 @@ The integration tests validate that all API endpoints work correctly with real G
 
 6. **Real GitHub API Integration**
    - Live API validation (with TEST_TOKEN)
-   - Authentication against real GitHub API
-   - Repository data fetching from omercnet/GitHub
-   - Organization listing for omercnet account
+   - Authentication against real GitHub API as **omercbot** user
+   - Repository data fetching from **omercnet/GitHub** repository
+   - Organization listing for omercbot account  
    - Pull requests from omercnet/GitHub repository
    - **Workflow runs and actions testing** (validates existing CI/Code Quality/Security workflows)
    - Repository contents and status validation
@@ -82,10 +82,12 @@ The tests automatically detect the presence of `TEST_TOKEN` environment variable
 
 ### Required Permissions
 
-The `TEST_TOKEN` should have these GitHub permissions:
-- `repo` - Repository access
+The `TEST_TOKEN` should be a GitHub personal access token for the **omercbot** user with these permissions:
+- `repo` - Repository access (to access omercnet/GitHub repository)
 - `read:org` - Organization membership
 - `read:user` - User profile information
+
+**Note**: The token belongs to the `omercbot` user but needs access to the `omercnet/GitHub` repository for testing.
 
 ## API Routes Tested
 
@@ -116,7 +118,7 @@ Example workflow configuration:
 1. Go to repository Settings → Secrets and variables → Actions
 2. Click "New repository secret"
 3. Name: `TEST_TOKEN`
-4. Value: Your GitHub personal access token
+4. Value: **omercbot** user's GitHub personal access token with access to omercnet/GitHub
 5. Click "Add secret"
 
 ## Test Output

@@ -4,7 +4,8 @@
  */
 
 const TEST_TOKEN = process.env.TEST_TOKEN
-const TEST_OWNER = 'omercnet'
+const TEST_USER = 'omercbot' // The authenticated user (token holder)
+const TEST_OWNER = 'omercnet' // The repository owner
 const TEST_REPO = 'GitHub'
 
 // Skip real API tests if no token provided, but run structure tests
@@ -406,19 +407,97 @@ describe('GitHub API Routes Integration Tests', () => {
     beforeAll(async () => {
       console.log(`🚀 Running integration tests with real GitHub API`)
       console.log(`📊 Test configuration:`)
-      console.log(`   - Owner: ${TEST_OWNER}`)
+      console.log(`   - Authenticated User: ${TEST_USER}`)
+      console.log(`   - Target Owner: ${TEST_OWNER}`)
       console.log(`   - Repository: ${TEST_REPO}`)
       console.log(`   - Token provided: ${TEST_TOKEN ? '✅ YES' : '❌ NO'}`)
       
-      // Create real Octokit instance for direct API testing
-      const { Octokit } = require('@octokit/core')
-      realOctokit = new Octokit({ auth: TEST_TOKEN })
+      // Create a simple HTTP client that mimics Octokit's request interface
+      // but uses Node.js built-in https module to avoid ES module issues
+      realOctokit = {
+        request: async (endpoint: string, params?: any) => {
+          const https = require('https')
+          const { URL } = require('url')
+          
+          // Parse endpoint
+          const [method, path] = endpoint.split(' ')
+          let urlPath = path || endpoint
+          
+          // Replace path parameters
+          if (params) {
+            Object.keys(params).forEach(key => {
+              urlPath = urlPath.replace(`{${key}}`, params[key])
+            })
+          }
+          
+          // Build query string for GET requests
+          let queryString = ''
+          if (method === 'GET' && params) {
+            const queryParams = new URLSearchParams()
+            Object.keys(params).forEach(key => {
+              if (!path?.includes(`{${key}}`)) {
+                queryParams.append(key, params[key])
+              }
+            })
+            if (queryParams.toString()) {
+              queryString = `?${queryParams.toString()}`
+            }
+          }
+          
+          const url = new URL(`https://api.github.com${urlPath}${queryString}`)
+          
+          return new Promise((resolve, reject) => {
+            const options = {
+              hostname: url.hostname,
+              port: 443,
+              path: url.pathname + url.search,
+              method: method || 'GET',
+              headers: {
+                'Authorization': `token ${TEST_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'User-Agent': 'GitHub-Integration-Tests',
+                ...(method === 'POST' && params ? { 'Content-Type': 'application/json' } : {})
+              }
+            }
+            
+            const req = https.request(options, (res) => {
+              let data = ''
+              res.on('data', (chunk) => {
+                data += chunk
+              })
+              res.on('end', () => {
+                try {
+                  const jsonData = JSON.parse(data)
+                  if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+                    resolve({ status: res.statusCode, data: jsonData })
+                  } else {
+                    reject({ status: res.statusCode, message: res.statusMessage, data: jsonData })
+                  }
+                } catch (error) {
+                  reject({ status: res.statusCode, message: 'Invalid JSON response' })
+                }
+              })
+            })
+            
+            req.on('error', (error) => {
+              reject({ status: 500, message: error.message })
+            })
+            
+            if (method === 'POST' && params) {
+              req.write(JSON.stringify(params))
+            }
+            
+            req.end()
+          })
+        }
+      }
     })
 
     it('should validate environment setup for real API testing', () => {
       expect(TEST_TOKEN).toBeDefined()
       expect(typeof TEST_TOKEN).toBe('string')
       expect(TEST_TOKEN.length).toBeGreaterThan(10)
+      expect(TEST_USER).toBe('omercbot')
       expect(TEST_OWNER).toBe('omercnet')
       expect(TEST_REPO).toBe('GitHub')
       
@@ -434,7 +513,7 @@ describe('GitHub API Routes Integration Tests', () => {
         expect(response.status).toBe(200)
         expect(response.data).toHaveProperty('login')
         expect(response.data).toHaveProperty('id')
-        expect(response.data.login).toBe(TEST_OWNER)
+        expect(response.data.login).toBe(TEST_USER)
         
         console.log(`✅ Authentication successful: ${response.data.login}`)
       } catch (error) {
@@ -443,7 +522,7 @@ describe('GitHub API Routes Integration Tests', () => {
       }
     })
 
-    it('should fetch real repositories from omercnet account', async () => {
+    it('should fetch real repositories from omercbot account', async () => {
       console.log(`📦 Testing repositories endpoint against live API`)
       
       try {
@@ -456,21 +535,28 @@ describe('GitHub API Routes Integration Tests', () => {
         expect(Array.isArray(response.data)).toBe(true)
         expect(response.data.length).toBeGreaterThan(0)
         
-        // Should find the GitHub repository
-        const githubRepo = response.data.find((repo: any) => repo.name === 'GitHub')
-        expect(githubRepo).toBeDefined()
-        expect(githubRepo.owner.login).toBe('omercnet')
-        expect(githubRepo.full_name).toBe('omercnet/GitHub')
+        console.log(`✅ Found ${response.data.length} repositories for ${TEST_USER}`)
         
-        console.log(`✅ Found ${response.data.length} repositories, including omercnet/GitHub`)
-        console.log(`✅ GitHub repo details: ${githubRepo.language}, ${githubRepo.stargazers_count} stars`)
+        // Verify we can access omercnet/GitHub repository
+        const orgRepoResponse = await realOctokit.request('GET /repos/{owner}/{repo}', {
+          owner: TEST_OWNER,
+          repo: TEST_REPO
+        })
+        
+        expect(orgRepoResponse.status).toBe(200)
+        expect(orgRepoResponse.data.name).toBe('GitHub')
+        expect(orgRepoResponse.data.owner.login).toBe('omercnet')
+        expect(orgRepoResponse.data.full_name).toBe('omercnet/GitHub')
+        
+        console.log(`✅ Successfully accessed target repository: ${orgRepoResponse.data.full_name}`)
+        console.log(`✅ GitHub repo details: ${orgRepoResponse.data.language}, ${orgRepoResponse.data.stargazers_count} stars`)
       } catch (error) {
         console.error('Repository fetch failed:', error)
         throw error
       }
     })
 
-    it('should fetch real organizations for omercnet', async () => {
+    it('should fetch real organizations for omercbot', async () => {
       console.log(`🏢 Testing organizations endpoint against live API`)
       
       try {
@@ -484,9 +570,9 @@ describe('GitHub API Routes Integration Tests', () => {
         expect(Array.isArray(orgsResponse.data)).toBe(true)
         
         // User should exist
-        expect(userResponse.data.login).toBe('omercnet')
+        expect(userResponse.data.login).toBe(TEST_USER)
         
-        console.log(`✅ Found ${orgsResponse.data.length} organizations for omercnet`)
+        console.log(`✅ Found ${orgsResponse.data.length} organizations for ${TEST_USER}`)
         console.log(`✅ User: ${userResponse.data.login} (${userResponse.data.name || 'No display name'})`)
       } catch (error) {
         console.error('Organizations fetch failed:', error)
@@ -721,12 +807,14 @@ describe('Integration Test Infrastructure', () => {
 
   it('should be ready for CI/CD integration', () => {
     console.log(`🚀 CI/CD Integration Status:`)
-    console.log(`   - Repository: omercnet/GitHub`)
+    console.log(`   - Authenticated User: ${TEST_USER}`)
+    console.log(`   - Repository: ${TEST_OWNER}/${TEST_REPO}`)
     console.log(`   - Secret name: TEST_TOKEN`)
     console.log(`   - Test framework: Jest`)
     console.log(`   - Test command: npm test`)
     console.log(`   - Ready for GitHub Actions: ✅`)
     
+    expect(TEST_USER).toBe('omercbot')
     expect(TEST_OWNER).toBe('omercnet')
     expect(TEST_REPO).toBe('GitHub')
   })
