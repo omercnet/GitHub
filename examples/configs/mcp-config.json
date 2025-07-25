@@ -1,0 +1,36 @@
+{
+  "github": {
+    "token": "${GITHUB_TOKEN}",
+    "baseUrl": "https://api.github.com"
+  },
+  "playwright": {
+    "headless": true,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeout": 30000,
+    "screenshotPath": "./screenshots"
+  },
+  "context7": {
+    "maxContextItems": 1000,
+    "contextStoragePath": "./context_storage",
+    "relevanceThreshold": 0.5,
+    "enableSemanticSearch": false
+  },
+  "memory": {
+    "maxShortTermItems": 100,
+    "maxLongTermItems": 1000,
+    "maxWorkingMemoryItems": 20,
+    "memoryStoragePath": "./memory_storage",
+    "autoConsolidateThreshold": 0.7,
+    "forgetFactorDays": 30
+  },
+  "server": {
+    "port": 3000,
+    "host": "localhost",
+    "transport": "stdio",
+    "cors": true,
+    "maxRequestSize": 1048576
+  }
+}
