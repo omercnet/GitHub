@@ -30,7 +30,7 @@ export default defineConfig({
   /* Configure visual comparisons */
   expect: {
     /* Allow for visual differences due to font rendering and browser-specific rendering */
-    toHaveScreenshot: { threshold: 0.3, mode: 'percent' },
+    toHaveScreenshot: { threshold: 0.3 },
   },
 
   /* Configure projects for major browsers */
