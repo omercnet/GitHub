@@ -12,16 +12,22 @@ describe('Application Integration Tests', () => {
 
       it('should use secure cookies in production', () => {
         const originalEnv = process.env.NODE_ENV
-        process.env.NODE_ENV = 'production'
+        Object.defineProperty(process.env, 'NODE_ENV', {
+          value: 'production',
+          configurable: true
+        })
         
         jest.resetModules()
         
         return import('../session').then(({ sessionOptions }) => {
-          expect(sessionOptions.cookieOptions.secure).toBe(true)
-          expect(sessionOptions.cookieOptions.httpOnly).toBe(true)
-          expect(sessionOptions.cookieOptions.sameSite).toBe('lax')
+          expect(sessionOptions.cookieOptions?.secure).toBe(true)
+          expect(sessionOptions.cookieOptions?.httpOnly).toBe(true)
+          expect(sessionOptions.cookieOptions?.sameSite).toBe('lax')
           
-          process.env.NODE_ENV = originalEnv
+          Object.defineProperty(process.env, 'NODE_ENV', {
+            value: originalEnv,
+            configurable: true
+          })
         })
       })
 
@@ -205,19 +211,28 @@ describe('Application Integration Tests', () => {
       const originalEnv = process.env.NODE_ENV
       
       // Test development environment
-      process.env.NODE_ENV = 'development'
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'development',
+        configurable: true
+      })
       jest.resetModules()
       const devModule = await import('../session')
-      expect(devModule.sessionOptions.cookieOptions.secure).toBe(false)
+      expect(devModule.sessionOptions.cookieOptions?.secure).toBe(false)
       
       // Test production environment
-      process.env.NODE_ENV = 'production'
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'production',
+        configurable: true
+      })
       jest.resetModules()
       const prodModule = await import('../session')
-      expect(prodModule.sessionOptions.cookieOptions.secure).toBe(true)
+      expect(prodModule.sessionOptions.cookieOptions?.secure).toBe(true)
       
       // Restore original environment
-      process.env.NODE_ENV = originalEnv
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: originalEnv,
+        configurable: true
+      })
       jest.resetModules()
     })
   })

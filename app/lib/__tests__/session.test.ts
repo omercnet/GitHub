@@ -30,16 +30,22 @@ describe('Session Configuration', () => {
 
     it('should set secure to true in production', () => {
       const originalEnv = process.env.NODE_ENV
-      process.env.NODE_ENV = 'production'
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'production',
+        configurable: true
+      })
       
       // Re-require the module to get updated env
       jest.resetModules()
       const { sessionOptions: prodSessionOptions } = require('../session')
       
-      expect(prodSessionOptions.cookieOptions.secure).toBe(true)
+      expect(prodSessionOptions.cookieOptions?.secure).toBe(true)
       
       // Restore original env
-      process.env.NODE_ENV = originalEnv
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: originalEnv,
+        configurable: true
+      })
     })
   })
 

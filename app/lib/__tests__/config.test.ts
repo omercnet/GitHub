@@ -44,16 +44,22 @@ describe('Application Configuration', () => {
     it('should handle production environment configuration', () => {
       // Temporarily set NODE_ENV to production
       const originalEnv = process.env.NODE_ENV
-      process.env.NODE_ENV = 'production'
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'production',
+        configurable: true
+      })
       
       // Clear module cache to get fresh import
       jest.resetModules()
       
       return import('../session').then(({ sessionOptions }) => {
-        expect(sessionOptions.cookieOptions.secure).toBe(true)
+        expect(sessionOptions.cookieOptions?.secure).toBe(true)
         
         // Restore original environment
-        process.env.NODE_ENV = originalEnv
+        Object.defineProperty(process.env, 'NODE_ENV', {
+          value: originalEnv,
+          configurable: true
+        })
       })
     })
   })
