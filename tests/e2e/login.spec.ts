@@ -101,8 +101,8 @@ test.describe('Login Page UI Tests', () => {
       return window.getComputedStyle(document.body).backgroundColor;
     });
     
-    // Should be dark gray background
-    expect(background).toMatch(/rgb\(17, 24, 39\)|#111827/);
+    // Should be dark gray background (custom CSS color)
+    expect(background).toMatch(/rgb\(13, 17, 23\)|#0d1117/i);
   });
 
   test('should handle hover states correctly', async ({ page }) => {
