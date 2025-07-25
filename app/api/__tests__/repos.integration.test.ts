@@ -83,12 +83,12 @@ describeWithRealToken('Real Repository API Integration', () => {
         repo.name === TEST_REPO && repo.owner.login === TEST_OWNER
       )
       expect(targetRepo).toBeDefined()
-      expect(targetRepo.full_name).toBe(`${TEST_OWNER}/${TEST_REPO}`)
+      expect(targetRepo?.full_name).toBe(`${TEST_OWNER}/${TEST_REPO}`)
       
       console.log(`✅ Repository access patterns validated`)
       console.log(`   - Personal repos: ${userReposResponse.data.length}`)
       console.log(`   - Organization repos: ${orgReposResponse.data.length}`)
-      console.log(`   - Target repository: ${targetRepo.full_name}`)
+      console.log(`   - Target repository: ${targetRepo?.full_name}`)
       
     } catch (error: any) {
       console.error('Repository access test failed:', error.message)
@@ -182,17 +182,17 @@ describeWithRealToken('Real Repository API Integration', () => {
       expect(targetRepo).toHaveProperty('stargazers_count')
       expect(targetRepo).toHaveProperty('forks_count')
       
-      expect(targetRepo.owner).toHaveProperty('login', TEST_OWNER)
-      expect(targetRepo.owner).toHaveProperty('id')
-      expect(targetRepo.owner).toHaveProperty('avatar_url')
+      expect(targetRepo?.owner).toHaveProperty('login', TEST_OWNER)
+      expect(targetRepo?.owner).toHaveProperty('id')
+      expect(targetRepo?.owner).toHaveProperty('avatar_url')
       
       console.log(`✅ Repository data structure validated`)
-      console.log(`   - Repository: ${targetRepo.full_name}`)
-      console.log(`   - Language: ${targetRepo.language}`)
-      console.log(`   - Default branch: ${targetRepo.default_branch}`)
-      console.log(`   - Stars: ${targetRepo.stargazers_count}`)
-      console.log(`   - Forks: ${targetRepo.forks_count}`)
-      console.log(`   - Last updated: ${targetRepo.updated_at}`)
+      console.log(`   - Repository: ${targetRepo?.full_name}`)
+      console.log(`   - Language: ${targetRepo?.language}`)
+      console.log(`   - Default branch: ${targetRepo?.default_branch}`)
+      console.log(`   - Stars: ${targetRepo?.stargazers_count}`)
+      console.log(`   - Forks: ${targetRepo?.forks_count}`)
+      console.log(`   - Last updated: ${targetRepo?.updated_at}`)
       
     } catch (error: any) {
       console.error('Repository data structure test failed:', error.message)
@@ -220,9 +220,9 @@ describeWithRealToken('Real Repository API Integration', () => {
       expect(permissions).toHaveProperty('pull')
       
       console.log(`✅ Repository permissions validated`)
-      console.log(`   - Admin: ${permissions.admin}`)
-      console.log(`   - Push: ${permissions.push}`)
-      console.log(`   - Pull: ${permissions.pull}`)
+      console.log(`   - Admin: ${permissions?.admin}`)
+      console.log(`   - Push: ${permissions?.push}`)
+      console.log(`   - Pull: ${permissions?.pull}`)
       
     } catch (error: any) {
       console.error('Repository permissions test failed:', error.message)

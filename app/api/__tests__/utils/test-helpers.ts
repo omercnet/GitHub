@@ -44,3 +44,59 @@ export function createConditionalDescribe() {
   const { hasRealToken } = getTestConfig()
   return hasRealToken ? describe : describe.skip
 }
+
+/**
+ * Create a GitHub client for real API testing
+ * Uses Node.js built-in https module to avoid ES module issues
+ */
+export function createGitHubClient(token?: string) {
+  const https = require('https')
+  
+  if (!token) {
+    throw new Error('GitHub token is required for API client')
+  }
+  
+  return {
+    async request(method: string, path: string, data?: any) {
+      return new Promise((resolve, reject) => {
+        const options = {
+          hostname: 'api.github.com',
+          port: 443,
+          path,
+          method,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'User-Agent': 'GitHub-Clone-Integration-Tests/1.0',
+            'Content-Type': 'application/json'
+          }
+        }
+        
+        const req = https.request(options, (res: any) => {
+          let body = ''
+          res.on('data', (chunk: any) => body += chunk)
+          res.on('end', () => {
+            try {
+              const jsonData = JSON.parse(body)
+              if (res.statusCode >= 200 && res.statusCode < 300) {
+                resolve(jsonData)
+              } else {
+                reject(new Error(`GitHub API error: ${res.statusCode} ${jsonData.message || body}`))
+              }
+            } catch (e) {
+              reject(new Error(`Failed to parse response: ${body}`))
+            }
+          })
+        })
+        
+        req.on('error', reject)
+        
+        if (data) {
+          req.write(JSON.stringify(data))
+        }
+        
+        req.end()
+      })
+    }
+  }
+}
