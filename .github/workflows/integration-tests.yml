@@ -30,7 +30,7 @@ jobs:
       run: npm test
 
     - name: Run integration tests with real GitHub API
-      run: npm test -- app/api/__tests__/integration.test.ts
+      run: npm test -- app/api/__tests__/*.integration.test.ts
       env:
         TEST_TOKEN: ${{ secrets.TEST_TOKEN }}
 
