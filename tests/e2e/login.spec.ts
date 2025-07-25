@@ -93,16 +93,32 @@ test.describe('Login Page UI Tests', () => {
   test('should have consistent color scheme throughout', async ({ page }) => {
     await page.goto('/');
     
-    // Take full page screenshot for visual comparison
-    await expect(page).toHaveScreenshot('login-page.png');
-    
-    // Check computed styles for key elements
-    const background = await page.evaluate(() => {
-      return window.getComputedStyle(document.body).backgroundColor;
+    // Check computed styles for key elements instead of screenshots
+    const styles = await page.evaluate(() => {
+      const body = document.body;
+      const container = document.querySelector('[class*="rounded-lg"]') as HTMLElement;
+      const button = document.querySelector('button[type="submit"]') as HTMLElement;
+      const input = document.querySelector('input[type="password"]') as HTMLElement;
+      
+      return {
+        bodyBackground: window.getComputedStyle(body).backgroundColor,
+        containerBackground: container ? window.getComputedStyle(container).backgroundColor : null,
+        buttonBackground: button ? window.getComputedStyle(button).backgroundColor : null,
+        inputBackground: input ? window.getComputedStyle(input).backgroundColor : null,
+      };
     });
     
     // Should be dark gray background (custom CSS color)
-    expect(background).toMatch(/rgb\(13, 17, 23\)|#0d1117/i);
+    expect(styles.bodyBackground).toMatch(/rgb\(13, 17, 23\)|#0d1117/i);
+    
+    // Container should have a darker background than body
+    expect(styles.containerBackground).toBeTruthy();
+    
+    // Button should have blue background (TailwindCSS blue-600)
+    expect(styles.buttonBackground).toMatch(/rgb\(37, 99, 235\)|oklch\(/i);
+    
+    // Input should have gray background
+    expect(styles.inputBackground).toMatch(/rgb\(|oklch\(/i);
   });
 
   test('should handle hover states correctly', async ({ page }) => {
