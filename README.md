@@ -17,6 +17,7 @@ A complete clone of GitHub's user interface built with Next.js 15, featuring dar
 - **Language**: TypeScript throughout
 - **Authentication**: iron-session for encrypted HTTP-only cookies
 - **GitHub API**: @octokit/core for API integration
+- **Testing**: Jest with React Testing Library for comprehensive unit tests
 - **Deployment**: Optimized for Vercel and serverless environments
 
 ## Getting Started
@@ -103,6 +104,49 @@ The application implements a complete proxy layer for GitHub's REST API:
 - `GET /api/repos/[owner]/[repo]/status` - Get commit status and check runs
 - `GET /api/repos/[owner]/[repo]/actions` - List workflow runs
 - `GET/POST /api/repos/[owner]/[repo]/actions/[runId]` - View logs and re-run workflows
+
+## Testing
+
+The application includes comprehensive unit tests covering core functionality:
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+### Test Coverage
+
+- **28 comprehensive test cases** covering critical application logic
+- **100% coverage** on core session management module
+- **Tests include:**
+  - Session configuration and security validation
+  - GitHub token and repository parameter validation
+  - API request/response helpers
+  - Environment-specific behavior testing
+  - Error handling scenarios
+  - Type safety validation
+
+### Test Structure
+
+```
+app/
+├── lib/__tests__/
+│   ├── session.test.ts     # Session management tests
+│   ├── config.test.ts      # Configuration tests
+│   └── utils.test.ts       # Utility function tests
+└── api/__tests__/
+    └── helpers.test.ts     # API helper tests
+```
+
+All tests are built with Jest and follow testing best practices for Next.js applications.
 
 ## Architecture
 

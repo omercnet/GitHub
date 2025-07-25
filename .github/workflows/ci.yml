@@ -30,6 +30,11 @@ jobs:
     - name: Run ESLint
       run: npm run lint
 
+    - name: Run tests
+      run: npm test
+      env:
+        SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD || 'test-secret-key-for-ci-that-is-32-characters-long' }}
+
     - name: Build application
       run: npm run build
       env:
