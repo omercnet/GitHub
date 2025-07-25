@@ -25,6 +25,50 @@ jest.mock('next/dynamic', () => () => {
   return DynamicComponent
 })
 
+// Mock Next.js headers function for API routes
+jest.mock('next/headers', () => ({
+  cookies: jest.fn().mockResolvedValue({
+    get: jest.fn(),
+    set: jest.fn(),
+    delete: jest.fn(),
+  }),
+}))
+
+// Mock NextResponse for API route testing
+jest.mock('next/server', () => ({
+  NextResponse: {
+    json: jest.fn().mockImplementation((data, init) => ({
+      status: init?.status || 200,
+      json: jest.fn().mockResolvedValue(data),
+      headers: new Map(),
+      ...init
+    }))
+  },
+  NextRequest: jest.fn()
+}))
+
 // Mock environment variables
 process.env.SECRET_COOKIE_PASSWORD = 'test_password_at_least_32_characters_long'
 process.env.NODE_ENV = 'test'
+
+// Add Web API globals for Next.js compatibility
+const { TextEncoder, TextDecoder } = require('util')
+global.TextEncoder = TextEncoder
+global.TextDecoder = TextDecoder
+
+// Mock fetch for Node.js environment
+global.fetch = jest.fn()
+
+// Mock URL constructor for API route testing
+global.URL = jest.fn().mockImplementation((url) => {
+  const urlObj = new (require('url').URL)(url)
+  return {
+    ...urlObj,
+    searchParams: {
+      get: jest.fn().mockImplementation((key) => {
+        const params = new URLSearchParams(urlObj.search)
+        return params.get(key)
+      })
+    }
+  }
+})
