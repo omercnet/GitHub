@@ -42,7 +42,13 @@ The integration tests validate that all API endpoints work correctly with real G
 
 6. **Real GitHub API Integration**
    - Live API validation (with TEST_TOKEN)
-   - End-to-end route testing
+   - Authentication against real GitHub API
+   - Repository data fetching from omercnet/GitHub
+   - Organization listing for omercnet account
+   - Pull requests from omercnet/GitHub repository
+   - **Workflow runs and actions testing** (validates existing CI/Code Quality/Security workflows)
+   - Repository contents and status validation
+   - End-to-end route testing with real session tokens
 
 ## Running Tests
 
@@ -64,7 +70,7 @@ TEST_TOKEN=your_github_token npm test -- app/api/__tests__/integration.test.ts
 The tests automatically detect the presence of `TEST_TOKEN` environment variable:
 
 - **Without TEST_TOKEN**: Runs structure and unit tests (17 tests)
-- **With TEST_TOKEN**: Runs all tests including real API calls (20 tests)
+- **With TEST_TOKEN**: Runs all tests including real API calls (26 tests total, including 9 real API integration tests)
 
 ## Test Configuration
 
@@ -122,10 +128,10 @@ Example workflow configuration:
 ✓ Repository API Testing (3 tests)
 ✓ Specific Repository Routes Testing (3 tests)
 ✓ Error Handling (2 tests)
-○ Real GitHub API Integration (3 tests skipped)
+○ Real GitHub API Integration (9 tests skipped)
 ✓ Integration Test Infrastructure (3 tests)
 
-Total: 17 passed, 3 skipped
+Total: 17 passed, 9 skipped
 ```
 
 ### With TEST_TOKEN
@@ -135,10 +141,10 @@ Total: 17 passed, 3 skipped
 ✓ Repository API Testing (3 tests)
 ✓ Specific Repository Routes Testing (3 tests)
 ✓ Error Handling (2 tests)
-✓ Real GitHub API Integration (3 tests)
+✓ Real GitHub API Integration (9 tests including workflow runs)
 ✓ Integration Test Infrastructure (3 tests)
 
-Total: 20 passed
+Total: 26 passed
 ```
 
 ## Troubleshooting
