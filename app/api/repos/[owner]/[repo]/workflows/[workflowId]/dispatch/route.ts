@@ -27,8 +27,6 @@ export async function POST(
 
     return NextResponse.json({ success: true, message: 'Workflow dispatched successfully' })
   } catch (error: any) {
-    console.error('Error dispatching workflow:', error)
-    
     // Handle specific GitHub API errors
     if (error.status === 422) {
       return NextResponse.json(

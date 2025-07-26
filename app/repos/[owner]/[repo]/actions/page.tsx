@@ -668,6 +668,7 @@ function WorkflowDispatchModal({
   onClose: () => void
   onDispatch: (workflowId: number, ref: string, inputs: Record<string, string>) => void
 }) {
+  const params = useParams()
   const [selectedBranch, setSelectedBranch] = useState(branches.find(b => b.name === 'main')?.name || branches[0]?.name || 'main')
   const [inputs, setInputs] = useState<Record<string, string>>(() => {
     const defaultInputs: Record<string, string> = {}
@@ -676,6 +677,44 @@ function WorkflowDispatchModal({
     })
     return defaultInputs
   })
+  const [workflowInputs, setWorkflowInputs] = useState<Record<string, WorkflowInput>>(workflow.inputs)
+  const [isLoadingInputs, setIsLoadingInputs] = useState(false)
+
+  // Fetch workflow inputs for the selected branch
+  const fetchWorkflowInputsForBranch = async (branchName: string) => {
+    if (!branchName) return
+    
+    setIsLoadingInputs(true)
+    try {
+      const response = await fetch(`/api/repos/${params.owner}/${params.repo}/workflows?ref=${branchName}`)
+      if (response.ok) {
+        const data = await response.json()
+        // Find the current workflow in the response
+        const currentWorkflow = data.workflows.find((w: Workflow) => w.id === workflow.id)
+        if (currentWorkflow && currentWorkflow.inputs) {
+          setWorkflowInputs(currentWorkflow.inputs)
+          
+          // Reset inputs with new defaults
+          const newInputs: Record<string, string> = {}
+          const typedInputs = currentWorkflow.inputs as Record<string, WorkflowInput>
+          Object.entries(typedInputs).forEach(([key, config]) => {
+            newInputs[key] = config.default?.toString() || ''
+          })
+          setInputs(newInputs)
+        }
+      }
+    } catch (error) {
+      // If there's an error, keep the current inputs
+    } finally {
+      setIsLoadingInputs(false)
+    }
+  }
+
+  // Handle branch change
+  const handleBranchChange = (branchName: string) => {
+    setSelectedBranch(branchName)
+    fetchWorkflowInputsForBranch(branchName)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -706,8 +745,9 @@ function WorkflowDispatchModal({
             </label>
             <select
               value={selectedBranch}
-              onChange={(e) => setSelectedBranch(e.target.value)}
+              onChange={(e) => handleBranchChange(e.target.value)}
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isLoadingInputs}
             >
               {branches.map((branch) => (
                 <option key={branch.name} value={branch.name}>
@@ -715,10 +755,13 @@ function WorkflowDispatchModal({
                 </option>
               ))}
             </select>
+            {isLoadingInputs && (
+              <p className="text-sm text-gray-400 mt-1">Loading workflow inputs for {selectedBranch}...</p>
+            )}
           </div>
 
           {/* Workflow Inputs */}
-          {Object.entries(workflow.inputs).map(([key, config]) => (
+          {Object.entries(workflowInputs).map(([key, config]) => (
             <div key={key}>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 {key}
@@ -732,7 +775,8 @@ function WorkflowDispatchModal({
                   value={inputs[key] || ''}
                   onChange={(e) => handleInputChange(key, e.target.value)}
                   required={config.required}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isLoadingInputs}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                 >
                   <option value="">Select an option</option>
                   {config.options?.map((option) => (
@@ -745,7 +789,8 @@ function WorkflowDispatchModal({
                 <select
                   value={inputs[key] || config.default?.toString() || 'false'}
                   onChange={(e) => handleInputChange(key, e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isLoadingInputs}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                 >
                   <option value="true">true</option>
                   <option value="false">false</option>
@@ -757,7 +802,8 @@ function WorkflowDispatchModal({
                   onChange={(e) => handleInputChange(key, e.target.value)}
                   placeholder={config.default?.toString() || ''}
                   required={config.required}
-                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isLoadingInputs}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                 />
               )}
             </div>
@@ -773,9 +819,10 @@ function WorkflowDispatchModal({
             </button>
             <button
               type="submit"
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors"
+              disabled={isLoadingInputs}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Run workflow
+              {isLoadingInputs ? 'Loading...' : 'Run workflow'}
             </button>
           </div>
         </form>

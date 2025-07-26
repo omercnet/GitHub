@@ -8,6 +8,16 @@ export async function GET(
 ) {
   try {
     const { owner, repo } = await params
+    let ref: string | null = null
+    
+    // Safely try to parse URL for ref parameter
+    try {
+      const { searchParams } = new URL(request.url)
+      ref = searchParams.get('ref')
+    } catch {
+      // If URL parsing fails, continue without ref parameter
+    }
+    
     const octokit = await getOctokit()
     
     if (!octokit) {
@@ -35,11 +45,18 @@ export async function GET(
         // Check if workflow has workflow_dispatch trigger
         if (workflowDetails.data.badge_url && workflowDetails.data.path) {
           // Get the workflow content to check for workflow_dispatch
-          const workflowContent = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+          const workflowContentParams: any = {
             owner,
             repo,
             path: workflowDetails.data.path,
-          })
+          }
+          
+          // Add ref parameter if specified
+          if (ref) {
+            workflowContentParams.ref = ref
+          }
+          
+          const workflowContent = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', workflowContentParams)
           
           if ('content' in workflowContent.data) {
             const content = Buffer.from(workflowContent.data.content, 'base64').toString('utf-8')
@@ -56,14 +73,12 @@ export async function GET(
           }
         }
       } catch (error) {
-        console.error(`Error fetching workflow ${workflow.id}:`, error)
         // Continue with next workflow
       }
     }
 
     return NextResponse.json({ workflows: manualWorkflows })
   } catch (error) {
-    console.error('Error fetching workflows:', error)
     return NextResponse.json({ error: 'Failed to fetch workflows' }, { status: 500 })
   }
 }
@@ -116,7 +131,6 @@ function parseWorkflowInputs(yamlContent: string): Record<string, WorkflowInput>
       }
     }
   } catch (error) {
-    console.error('Error parsing workflow YAML:', error)
   }
   
   return inputs
