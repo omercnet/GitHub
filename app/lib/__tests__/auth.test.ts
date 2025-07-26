@@ -11,7 +11,7 @@ const validateGitHubToken = (token: any): string | null => {
     return null;
   }
   // Basic GitHub token pattern validation
-  if (!/^gh[ps]_[A-Za-z0-9_]{36,}$/.test(token.trim())) {
+  if (!/^gh[a-z]_[A-Za-z0-9_]+$/.test(token.trim())) {
     return null;
   }
   return token.trim();
