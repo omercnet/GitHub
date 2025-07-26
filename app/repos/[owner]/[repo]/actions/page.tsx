@@ -15,17 +15,20 @@ interface WorkflowRun {
   html_url: string
 }
 
+interface WorkflowInput {
+  description: string
+  required: boolean
+  type: 'string' | 'boolean' | 'choice'
+  default?: string | boolean
+  options?: string[]
+}
+
 interface Workflow {
   id: number
   name: string
   path: string
   state: string
-  inputs: Record<string, {
-    description?: string
-    required?: boolean
-    default?: string
-    type?: string
-  }>
+  inputs: Record<string, WorkflowInput>
 }
 
 interface Branch {
@@ -502,7 +505,7 @@ function WorkflowDispatchModal({
   const [inputs, setInputs] = useState<Record<string, string>>(() => {
     const defaultInputs: Record<string, string> = {}
     Object.entries(workflow.inputs).forEach(([key, config]) => {
-      defaultInputs[key] = config.default || ''
+      defaultInputs[key] = config.default?.toString() || ''
     })
     return defaultInputs
   })
@@ -565,11 +568,15 @@ function WorkflowDispatchModal({
                   className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select an option</option>
-                  {/* Note: GitHub choices would need to be parsed from the YAML */}
+                  {config.options?.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
                 </select>
               ) : config.type === 'boolean' ? (
                 <select
-                  value={inputs[key] || config.default || 'false'}
+                  value={inputs[key] || config.default?.toString() || 'false'}
                   onChange={(e) => handleInputChange(key, e.target.value)}
                   className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -581,7 +588,7 @@ function WorkflowDispatchModal({
                   type="text"
                   value={inputs[key] || ''}
                   onChange={(e) => handleInputChange(key, e.target.value)}
-                  placeholder={config.default || ''}
+                  placeholder={config.default?.toString() || ''}
                   required={config.required}
                   className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />

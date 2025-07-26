@@ -1,5 +1,6 @@
 import { getOctokit } from '@/app/lib/octokit'
 import { NextRequest, NextResponse } from 'next/server'
+import * as yaml from 'js-yaml'
 
 export async function GET(
   request: NextRequest,
@@ -67,45 +68,55 @@ export async function GET(
   }
 }
 
-function parseWorkflowInputs(yamlContent: string): Record<string, any> {
-  const inputs: Record<string, any> = {}
+interface WorkflowInput {
+  description: string
+  required: boolean
+  type: 'string' | 'boolean' | 'choice'
+  default?: string | boolean
+  options?: string[]
+}
+
+function parseWorkflowInputs(yamlContent: string): Record<string, WorkflowInput> {
+  const inputs: Record<string, WorkflowInput> = {}
   
   try {
-    // Simple regex-based parsing for workflow_dispatch inputs
-    const workflowDispatchMatch = yamlContent.match(/workflow_dispatch:\s*([\s\S]*?)(?=\n\w|\n$|$)/m)
-    if (!workflowDispatchMatch) return inputs
+    const doc = yaml.load(yamlContent) as any
     
-    const dispatchSection = workflowDispatchMatch[1]
-    const inputsMatch = dispatchSection.match(/inputs:\s*([\s\S]*?)(?=\n\s{0,2}\w|\n$|$)/m)
-    if (!inputsMatch) return inputs
+    if (!doc || typeof doc !== 'object') {
+      return inputs
+    }
     
-    const inputsSection = inputsMatch[1]
-    const inputBlocks = inputsSection.split(/\n(?=\s{4}\w)/m)
+    // Navigate to workflow_dispatch.inputs
+    const on = doc.on
+    if (!on || typeof on !== 'object') {
+      return inputs
+    }
     
-    for (const block of inputBlocks) {
-      const lines = block.trim().split('\n')
-      if (lines.length === 0) continue
-      
-      const inputName = lines[0].trim().replace(':', '')
-      const inputData: any = {}
-      
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim()
-        if (line.includes(':')) {
-          const [key, ...valueParts] = line.split(':')
-          const value = valueParts.join(':').trim().replace(/^['"]|['"]$/g, '')
-          if (value) {
-            inputData[key.trim()] = value
-          }
+    const workflowDispatch = on.workflow_dispatch
+    if (!workflowDispatch || typeof workflowDispatch !== 'object') {
+      return inputs
+    }
+    
+    const workflowInputs = workflowDispatch.inputs
+    if (!workflowInputs || typeof workflowInputs !== 'object') {
+      return inputs
+    }
+    
+    // Process each input
+    for (const [inputName, inputConfig] of Object.entries(workflowInputs)) {
+      if (inputConfig && typeof inputConfig === 'object') {
+        const config = inputConfig as any
+        inputs[inputName] = {
+          description: config.description || '',
+          required: config.required === true,
+          type: config.type || 'string',
+          default: config.default,
+          options: config.options
         }
-      }
-      
-      if (Object.keys(inputData).length > 0) {
-        inputs[inputName] = inputData
       }
     }
   } catch (error) {
-    console.error('Error parsing workflow inputs:', error)
+    console.error('Error parsing workflow YAML:', error)
   }
   
   return inputs

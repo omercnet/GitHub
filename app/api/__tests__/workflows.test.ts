@@ -57,18 +57,34 @@ describe('Workflow API Routes', () => {
             badge_url: 'https://example.com',
           },
         })
-        // Mock workflow content
+        // Mock workflow content with complex inputs including choice type
         .mockResolvedValueOnce({
           data: {
-            content: Buffer.from(`name: Test Workflow
+            content: Buffer.from(`name: Manual Dispatch with All Input Types
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: Environment to deploy
+      string_input:
+        description: 'A string value'
         required: true
-        default: staging
-        type: string
+        default: 'default text'
+      choice_input:
+        description: 'Pick one option'
+        required: true
+        type: choice
+        options:
+          - option1
+          - option2
+          - option3
+        default: option2
+      boolean_input:
+        description: 'Enable feature?'
+        required: true
+        type: boolean
+        default: true
+      optional_string:
+        description: 'Optional string input'
+        required: false
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -86,8 +102,34 @@ jobs:
       expect(response.status).toBe(200)
       expect(data.workflows).toHaveLength(1)
       expect(data.workflows[0].name).toBe('Test Workflow')
-      // Note: YAML parsing is complex - this test validates the workflow is found with workflow_dispatch
       expect(data.workflows[0]).toHaveProperty('inputs')
+      
+      // Verify complex input parsing
+      const inputs = data.workflows[0].inputs
+      expect(inputs.string_input).toEqual({
+        description: 'A string value',
+        required: true,
+        type: 'string',
+        default: 'default text'
+      })
+      expect(inputs.choice_input).toEqual({
+        description: 'Pick one option',
+        required: true,
+        type: 'choice',
+        default: 'option2',
+        options: ['option1', 'option2', 'option3']
+      })
+      expect(inputs.boolean_input).toEqual({
+        description: 'Enable feature?',
+        required: true,
+        type: 'boolean',
+        default: true
+      })
+      expect(inputs.optional_string).toEqual({
+        description: 'Optional string input',
+        required: false,
+        type: 'string'
+      })
     })
 
     it('should handle errors gracefully', async () => {
