@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'next/navigation'
+import LogFormatter from '@/app/components/LogFormatter'
 
 interface WorkflowRun {
   id: number
@@ -253,9 +254,7 @@ export default function ActionsPage() {
               {isLoadingJobLogs && jobLogs === '' ? (
                 <div className="text-gray-400">Loading job logs...</div>
               ) : (
-                <pre className="text-sm text-gray-300 whitespace-pre-wrap">
-                  {jobLogs || 'No logs available'}
-                </pre>
+                <LogFormatter logs={jobLogs || ''} />
               )}
             </div>
             <div className="p-4 border-t border-gray-700 text-sm text-gray-400">
