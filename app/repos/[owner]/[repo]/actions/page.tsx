@@ -17,6 +17,17 @@ interface WorkflowRun {
   html_url: string
 }
 
+interface Job {
+  id: number
+  name: string
+  status: string
+  conclusion: string | null
+  started_at: string | null
+  completed_at: string | null
+  html_url: string
+  run_id: number
+}
+
 interface WorkflowInput {
   description: string
   required: boolean
@@ -38,17 +49,6 @@ interface Branch {
   commit: {
     sha: string
   }
-}
-
-interface Job {
-  id: number
-  name: string
-  status: string
-  conclusion: string | null
-  started_at: string | null
-  completed_at: string | null
-  html_url: string
-  run_id: number
 }
 
 export default function ActionsPage() {
@@ -148,6 +148,24 @@ export default function ActionsPage() {
     }
   }
 
+  const rerunWorkflow = async (runId: number) => {
+    try {
+      const response = await fetch(
+        `/api/repos/${params.owner}/${params.repo}/actions/${runId}`,
+        { method: 'POST' }
+      )
+
+      if (response.ok) {
+        fetchWorkflowRuns()
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to rerun workflow')
+      }
+    } catch (error) {
+      alert('Failed to rerun workflow')
+    }
+  }
+
   const fetchManualWorkflows = async () => {
     setIsLoadingWorkflows(true)
     try {
@@ -172,24 +190,6 @@ export default function ActionsPage() {
       }
     } catch (error) {
       console.error('Failed to fetch branches:', error)
-    }
-  }
-
-  const rerunWorkflow = async (runId: number) => {
-    try {
-      const response = await fetch(
-        `/api/repos/${params.owner}/${params.repo}/actions/${runId}`,
-        { method: 'POST' }
-      )
-
-      if (response.ok) {
-        fetchWorkflowRuns()
-      } else {
-        const error = await response.json()
-        alert(error.error || 'Failed to rerun workflow')
-      }
-    } catch (error) {
-      alert('Failed to rerun workflow')
     }
   }
 
@@ -218,7 +218,6 @@ export default function ActionsPage() {
     } catch (error) {
       alert('Failed to dispatch workflow')
     }
-  }
   }
 
   const toggleRunExpansion = (runId: number) => {
@@ -455,140 +454,140 @@ export default function ActionsPage() {
       {/* Tab Content */}
       {activeTab === 'runs' ? (
         <div className="bg-gray-800 rounded-lg overflow-hidden">
-          {isLoading ? (
-            <div className="p-8 text-center text-gray-400">Loading...</div>
-          ) : workflowRuns.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">No workflow runs found</div>
-          ) : (
-            <div className="divide-y divide-gray-700">
-              {workflowRuns.map((run) => (
-                <div key={run.id}>
-                  {/* Workflow Run Header */}
-                  <div className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => toggleRunExpansion(run.id)}
-                          className="text-gray-400 hover:text-white"
-                        >
-                          {expandedRuns.has(run.id) ? '▼' : '▶'}
-                        </button>
-                        <span className="text-xl">{getStatusIcon(run.status, run.conclusion)}</span>
-                        <div>
-                          <h3 className="text-white font-medium">{run.name}</h3>
-                          <div className="text-sm text-gray-400">
-                            <span className={getStatusColor(run.status, run.conclusion)}>
-                              {run.conclusion || run.status}
-                            </span>
-                            {' · '}
-                            <span>{run.head_branch}</span>
-                            {' · '}
-                            <span>{formatSha(run.head_sha)}</span>
-                            {' · '}
-                            <span>{formatDate(run.created_at)}</span>
-                          </div>
+        {isLoading ? (
+          <div className="p-8 text-center text-gray-400">Loading...</div>
+        ) : workflowRuns.length === 0 ? (
+          <div className="p-8 text-center text-gray-400">No workflow runs found</div>
+        ) : (
+          <div className="divide-y divide-gray-700">
+            {workflowRuns.map((run) => (
+              <div key={run.id}>
+                {/* Workflow Run Header */}
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => toggleRunExpansion(run.id)}
+                        className="text-gray-400 hover:text-white"
+                      >
+                        {expandedRuns.has(run.id) ? '▼' : '▶'}
+                      </button>
+                      <span className="text-xl">{getStatusIcon(run.status, run.conclusion)}</span>
+                      <div>
+                        <h3 className="text-white font-medium">{run.name}</h3>
+                        <div className="text-sm text-gray-400">
+                          <span className={getStatusColor(run.status, run.conclusion)}>
+                            {run.conclusion || run.status}
+                          </span>
+                          {' · '}
+                          <span>{run.head_branch}</span>
+                          {' · '}
+                          <span>{formatSha(run.head_sha)}</span>
+                          {' · '}
+                          <span>{formatDate(run.created_at)}</span>
                         </div>
                       </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => downloadWorkflowLogs(run.id)}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                        >
-                          Download Logs
-                        </button>
-                        <button
-                          onClick={() => rerunWorkflow(run.id)}
-                          className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm"
-                        >
-                          Re-run
-                        </button>
-                        <button
-                          onClick={() => {
-                            cache.clear()
-                            fetchWorkflowRuns(true)
-                          }}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                          title="Clear cache and refresh"
-                        >
-                          Clear Cache
-                        </button>
-                        <a
-                          href={run.html_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm inline-block"
-                        >
-                          GitHub
-                        </a>
-                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => downloadWorkflowLogs(run.id)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Download Logs
+                      </button>
+                      <button
+                        onClick={() => rerunWorkflow(run.id)}
+                        className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Re-run
+                      </button>
+                      <button
+                        onClick={() => {
+                          cache.clear()
+                          fetchWorkflowRuns(true)
+                        }}
+                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                        title="Clear cache and refresh"
+                      >
+                        Clear Cache
+                      </button>
+                      <a
+                        href={run.html_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm inline-block"
+                      >
+                        GitHub
+                      </a>
                     </div>
                   </div>
+                </div>
 
-                  {/* Jobs List (when expanded) */}
-                  {expandedRuns.has(run.id) && (
-                    <div className="bg-gray-900 border-t border-gray-700">
-                      {runJobs[run.id] ? (
-                        runJobs[run.id].length > 0 ? (
-                          <div className="divide-y divide-gray-700">
-                            {runJobs[run.id].map((job) => (
-                              <div key={job.id} className="p-4 pl-8">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-3">
-                                    <span className="text-lg">{getStatusIcon(job.status, job.conclusion)}</span>
-                                    <div>
-                                      <h4 className="text-white font-medium">{job.name}</h4>
-                                      <div className="text-sm text-gray-400">
-                                        <span className={getStatusColor(job.status, job.conclusion)}>
-                                          {job.conclusion || job.status}
-                                        </span>
-                                        {job.started_at && (
-                                          <>
-                                            {' · Started '}
-                                            <span>{formatDate(job.started_at)}</span>
-                                          </>
-                                        )}
-                                        {job.completed_at && (
-                                          <>
-                                            {' · Completed '}
-                                            <span>{formatDate(job.completed_at)}</span>
-                                          </>
-                                        )}
-                                      </div>
+                {/* Jobs List (when expanded) */}
+                {expandedRuns.has(run.id) && (
+                  <div className="bg-gray-900 border-t border-gray-700">
+                    {runJobs[run.id] ? (
+                      runJobs[run.id].length > 0 ? (
+                        <div className="divide-y divide-gray-700">
+                          {runJobs[run.id].map((job) => (
+                            <div key={job.id} className="p-4 pl-8">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                  <span className="text-lg">{getStatusIcon(job.status, job.conclusion)}</span>
+                                  <div>
+                                    <h4 className="text-white font-medium">{job.name}</h4>
+                                    <div className="text-sm text-gray-400">
+                                      <span className={getStatusColor(job.status, job.conclusion)}>
+                                        {job.conclusion || job.status}
+                                      </span>
+                                      {job.started_at && (
+                                        <>
+                                          {' · Started '}
+                                          <span>{formatDate(job.started_at)}</span>
+                                        </>
+                                      )}
+                                      {job.completed_at && (
+                                        <>
+                                          {' · Completed '}
+                                          <span>{formatDate(job.completed_at)}</span>
+                                        </>
+                                      )}
                                     </div>
                                   </div>
-                                  <div className="flex space-x-2">
-                                    <button
-                                      onClick={() => viewJobLogs(job)}
-                                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
-                                    >
-                                      View Logs
-                                    </button>
-                                    <a
-                                      href={job.html_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm inline-block"
-                                    >
-                                      GitHub
-                                    </a>
-                                  </div>
+                                </div>
+                                <div className="flex space-x-2">
+                                  <button
+                                    onClick={() => viewJobLogs(job)}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                                  >
+                                    View Logs
+                                  </button>
+                                  <a
+                                    href={job.html_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm inline-block"
+                                  >
+                                    GitHub
+                                  </a>
                                 </div>
                               </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="p-4 pl-8 text-gray-400">No jobs found for this workflow run</div>
-                        )
+                            </div>
+                          ))}
+                        </div>
                       ) : (
-                        <div className="p-4 pl-8 text-gray-400">Loading jobs...</div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                        <div className="p-4 pl-8 text-gray-400">No jobs found for this workflow run</div>
+                      )
+                    ) : (
+                      <div className="p-4 pl-8 text-gray-400">Loading jobs...</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       ) : (
         <ManualWorkflowsList
           workflows={manualWorkflows}
