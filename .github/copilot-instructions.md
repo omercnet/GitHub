@@ -22,8 +22,9 @@ This repository is a GitHub UI clone built with Next.js 15, TypeScript, and the 
   - Follow Next.js 15 App Router conventions for file structure
 - **Include unit tests and ensure CI passes**:
   - Add tests in `__tests__` directories following existing patterns
-  - Maintain current test coverage standards (38+ tests)
+  - Maintain current test coverage standards (74+ tests across 9 test suites)
   - Use Jest with React Testing Library for component testing
+  - Include integration tests with real GitHub API calls for authentication testing
 - **Never hardcode secrets or sensitive data**:
   - Use environment variables from `.env.local`
   - Store sensitive data in iron-session encrypted cookies
@@ -33,6 +34,7 @@ This repository is a GitHub UI clone built with Next.js 15, TypeScript, and the 
 
 - **Use environment variables or secrets managers**:
   - `SECRET_COOKIE_PASSWORD` for session encryption (32+ characters)
+  - `GITHUB_TOKEN` for testing with real GitHub API (optional, improves rate limits)
   - GitHub Personal Access Tokens stored in encrypted sessions only
   - Reference `.env.example` for required variables
 - **Scan code for secrets and vulnerabilities before committing**:
@@ -65,6 +67,8 @@ This repository is a GitHub UI clone built with Next.js 15, TypeScript, and the 
   - CI workflow: ESLint + build + test on Node.js 22.x
   - Code Quality workflow: reviewdog ESLint + TypeScript checking
   - Security workflow: npm audit + dependency review
+  - Integration test workflow: Real GitHub API testing with `secrets.TEST_PAT`
+  - Achieves 5,000 requests/hour rate limit vs 60/hour without authentication
 
 ## 🔖 Tags & Releases
 
@@ -74,7 +78,7 @@ This repository is a GitHub UI clone built with Next.js 15, TypeScript, and the 
 
 ## 📄 Docs
 
-- **Update `README.md` and `docs/` if anything significant changes**
+- **Update `README.md` if anything significant changes**
 - **Add usage, config, and troubleshooting for each feature**:
   - Update API routes section for new endpoints
   - Document new environment variables
@@ -83,30 +87,43 @@ This repository is a GitHub UI clone built with Next.js 15, TypeScript, and the 
 
 ## 🎯 Project-Specific Guidelines
 
+If anything below changes as part of your work make sure to update this file too.
+
 ### API Routes (`app/api/`)
+
 - Implement session validation on all routes
 - Use consistent error response format
 - Proxy GitHub API calls to protect tokens
 - Handle rate limiting gracefully
 
 ### Components & Pages (`app/`)
+
 - Use TypeScript interfaces for props and state
 - Implement loading states and error boundaries
 - Follow dark theme conventions consistently
 - Use Tailwind utility classes following existing patterns
 
 ### Session Management (`app/lib/session.ts`)
+
 - Always encrypt sensitive data in cookies
 - Validate sessions on API routes
 - Handle session expiration gracefully
 
 ### Testing (`__tests__/`)
+
 - Test critical authentication and API logic
-- Mock external API calls appropriately
+- Use real GitHub API calls in integration tests when `GITHUB_TOKEN` is available
+- Mock external API calls appropriately for unit tests
 - Maintain existing test structure and patterns
 - Include both positive and negative test cases
+- Organize test helpers in `shared/` subdirectories to avoid Jest discovery issues
+- Current test structure: 9 test suites with 74 total tests
+  - Unit tests: Component logic, utility functions, configuration
+  - Integration tests: Real GitHub API connectivity and authentication
+  - E2E tests: Full user workflows with Playwright
 
 ### Environment Configuration
+
 - Development: Uses HTTP cookies, local environment
 - Production: Uses HTTPS, encrypted sessions, Vercel environment
 
