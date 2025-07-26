@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+import '@testing-library/jest-dom'
 import LogFormatter from '@/app/components/LogFormatter'
 
 const sampleLogs = `2025-07-26T06:22:40.5975705Z Current runner version: '2.326.0'

@@ -31,11 +31,15 @@
   },
   "include": [
     "next-env.d.ts",
+    "types.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "tests/e2e/**/*",
+    "playwright-report/**/*",
+    "test-results/**/*"
   ]
 }
