@@ -24,7 +24,7 @@ export const getWorkflowRuns = cache(
         repo,
         per_page: perPage,
         headers: {
-          "If-None-Match": "", // Will be populated from client ETags
+          ...(etag ? { "If-None-Match": etag } : {}), // Dynamically include ETag if available
         },
       }
     );
