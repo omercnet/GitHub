@@ -4,6 +4,12 @@ import { cookies } from 'next/headers'
 import { SessionData, sessionOptions } from './session'
 
 export async function getOctokit(): Promise<Octokit | null> {
+  // For integration testing purposes only - bypass authentication when in test mode
+  if (process.env.NODE_ENV === 'test') {
+    // Return an unauthenticated Octokit client for testing public repositories
+    return new Octokit()
+  }
+
   const session = await getIronSession<SessionData>(await cookies(), sessionOptions)
   
   if (!session.token) {
