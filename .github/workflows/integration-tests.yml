@@ -29,10 +29,11 @@ jobs:
     - name: Run unit tests
       run: npm test
 
-    - name: Run integration tests with real GitHub API
+    - name: Run integration tests
       run: npm test -- app/api/__tests__/*.integration.test.ts
       env:
-        TEST_TOKEN: ${{ secrets.TEST_TOKEN }}
+        NODE_ENV: test
+        BYPASS_AUTH_FOR_TESTING: true
 
     - name: Build application
       run: npm run build

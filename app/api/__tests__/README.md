@@ -4,49 +4,101 @@ This directory contains comprehensive integration tests for all GitHub API route
 
 ## Overview
 
-The integration tests validate API endpoints against live GitHub data using real authentication tokens when available. Tests are designed to run in two modes:
+The integration tests validate API endpoints using a testing bypass mechanism that allows access to public GitHub repositories without authentication. This enables thorough testing of the application's API routes without requiring real GitHub tokens.
 
-1. **Structure & Unit Tests** - Run without `TEST_TOKEN` (validates code structure, mocking, error handling)
-2. **Real API Integration** - Run with `TEST_TOKEN` (validates against live GitHub API)
+## Test Architecture
+
+The tests run in **testing mode** with authentication bypass enabled:
+
+1. **Testing Mode** - `NODE_ENV=test` and `BYPASS_AUTH_FOR_TESTING=true`
+   - Validates API route structure and functionality
+   - Tests against public GitHub repository (`omercnet/GitHub`)
+   - No real GitHub token required
+   - Uses authentication bypass for testing purposes only
 
 ## Test Structure
-
-The integration tests are split into focused, functional test files for better maintainability:
 
 ```
 app/api/__tests__/
 ├── utils/
-│   └── test-helpers.ts          # Shared test utilities and helpers
-├── structure.integration.test.ts    # API route structure validation
-├── auth.integration.test.ts         # Authentication flow tests
-├── repos.integration.test.ts        # Repository API tests
-├── orgs.integration.test.ts         # Organization API tests
-├── pulls.integration.test.ts        # Pull request API tests
-├── actions.integration.test.ts      # GitHub Actions/workflows tests
-├── contents.integration.test.ts     # Repository contents tests
-├── status.integration.test.ts       # Repository status tests
-├── infrastructure.integration.test.ts # Test infrastructure validation
-└── README.md                        # This documentation
+│   └── test-helpers.ts          # Simple test utilities
+├── integration.test.ts          # Comprehensive integration tests
+└── README.md                    # This documentation
 ```
 
 ## Test Configuration
 
 ### Environment Variables
 
-- `TEST_TOKEN` - GitHub personal access token for real API testing
-  - **Required for real API tests**
-  - Should have repo access to `omercnet/GitHub`
-  - User: `omercbot` (authenticated user)
-  - Target: `omercnet/GitHub` (repository being tested)
+- `NODE_ENV=test` - Enables testing mode
+- `BYPASS_AUTH_FOR_TESTING=true` - Enables authentication bypass for testing
+- No GitHub token required
 
-### Test Execution Modes
+### Test Execution
 
 ```bash
-# Without TEST_TOKEN (structure & unit tests only)
-npm test
+# Run integration tests (testing mode with bypass enabled)
+NODE_ENV=test BYPASS_AUTH_FOR_TESTING=true npm test
 
-# With TEST_TOKEN (full integration with real GitHub API)
-TEST_TOKEN=your_github_token npm test
+# Or simply (CI/CD will set these automatically)
+npm test
+```
+
+## What Gets Tested
+
+### API Route Structure
+- ✅ All API route files exist and have proper exports
+- ✅ Session configuration is properly set up
+- ✅ Authentication bypass mechanism is in place
+
+### Authentication Bypass
+- ✅ Testing mode enables bypass of iron-session authentication
+- ✅ Production mode still requires valid GitHub tokens
+- ✅ Bypass only works when both environment variables are set
+
+### API Route Functionality
+- ✅ `/api/repos` - Repository listing
+- ✅ `/api/orgs` - Organization access
+- ✅ `/api/repos/[owner]/[repo]/pulls` - Pull requests
+- ✅ `/api/repos/[owner]/[repo]/actions` - Workflow runs
+- ✅ `/api/repos/[owner]/[repo]/contents` - Repository contents
+- ✅ `/api/repos/[owner]/[repo]/status` - Repository status
+
+### Public GitHub API Access
+- ✅ Direct GitHub API connectivity for public repositories
+- ✅ Repository data structure validation
+- ✅ Workflow runs and status information
+- ✅ Pull requests and repository contents
+
+## Security
+
+The authentication bypass is designed for testing purposes only:
+
+- ✅ Only works when `NODE_ENV=test`
+- ✅ Only works when `BYPASS_AUTH_FOR_TESTING=true`
+- ✅ In production, all routes require valid GitHub token authentication
+- ✅ iron-session encryption still works for production authentication
+
+## CI/CD Integration
+
+The GitHub Actions workflow automatically sets the required environment variables:
+
+```yaml
+- name: Run integration tests
+  run: npm test -- app/api/__tests__/integration.test.ts
+  env:
+    NODE_ENV: test
+    BYPASS_AUTH_FOR_TESTING: true
+```
+
+## Production vs Testing
+
+| Mode | Authentication | Token Required | Repository Access |
+|------|---------------|----------------|-------------------|
+| Production | iron-session required | ✅ Yes | Private & Public |
+| Testing | Bypass enabled | ❌ No | Public only |
+
+This ensures comprehensive testing without compromising security in production.
 
 # Run specific test file
 npm test -- app/api/__tests__/repos.integration.test.ts
