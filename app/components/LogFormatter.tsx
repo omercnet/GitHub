@@ -156,12 +156,8 @@ export default function LogFormatter({ logs }: LogFormatterProps) {
   const formatTimestamp = (timestamp?: string) => {
     if (!timestamp) return null
     const date = new Date(timestamp)
-    return date.toLocaleTimeString([], { 
-      hour12: false, 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      second: '2-digit' 
-    })
+    // Always display UTC time to match the original log timestamps
+    return date.toISOString().substring(11, 19) // Extract HH:MM:SS from ISO string
   }
 
   const getLineTypeClass = (type: LogLine['type']) => {
