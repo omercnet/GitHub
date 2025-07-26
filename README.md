@@ -276,6 +276,36 @@ The workflows are designed to be easily customizable:
 - **Security Schedule**: Change the cron schedule in `security.yml`
 - **Deployment Target**: Replace Vercel action with your preferred platform
 
+## Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run test` - Run unit tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage
+- `npm run test:e2e` - Run end-to-end tests
+
+### Git Hooks
+
+This project uses [Husky](https://typicode.github.io/husky/) with [lint-staged](https://github.com/okonet/lint-staged) to ensure code quality:
+
+- **Pre-commit hook**: Automatically runs ESLint on staged JavaScript/TypeScript files
+- **Automatic setup**: Husky is automatically configured when you run `npm install`
+
+The pre-commit hook will:
+1. Run ESLint with `--fix` flag on staged `.js`, `.jsx`, `.ts`, `.tsx` files
+2. Block the commit if there are any linting errors that cannot be auto-fixed
+3. Allow the commit to proceed if all files pass linting
+
+To bypass the pre-commit hook (not recommended):
+```bash
+git commit --no-verify
+```
+
 ## Contributing
 
 1. Fork the repository
