@@ -28,16 +28,44 @@ interface Job {
   run_id: number
 }
 
+interface WorkflowInput {
+  description: string
+  required: boolean
+  type: 'string' | 'boolean' | 'choice'
+  default?: string | boolean
+  options?: string[]
+}
+
+interface Workflow {
+  id: number
+  name: string
+  path: string
+  state: string
+  inputs: Record<string, WorkflowInput>
+}
+
+interface Branch {
+  name: string
+  commit: {
+    sha: string
+  }
+}
+
 export default function ActionsPage() {
   const params = useParams()
   const [workflowRuns, setWorkflowRuns] = useState<WorkflowRun[]>([])
+  const [manualWorkflows, setManualWorkflows] = useState<Workflow[]>([])
+  const [branches, setBranches] = useState<Branch[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingWorkflows, setIsLoadingWorkflows] = useState(true)
   const [expandedRuns, setExpandedRuns] = useState<Set<number>>(new Set())
   const [runJobs, setRunJobs] = useState<Record<number, Job[]>>({})
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
+  const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
   const [jobLogs, setJobLogs] = useState('')
   const [jobLogOffset, setJobLogOffset] = useState(0)
   const [isLoadingJobLogs, setIsLoadingJobLogs] = useState(false)
+  const [activeTab, setActiveTab] = useState<'runs' | 'manual'>('runs')
   const logIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const fetchWorkflowRuns = useCallback(async (forceRefresh = false) => {
@@ -135,6 +163,60 @@ export default function ActionsPage() {
       }
     } catch (error) {
       alert('Failed to rerun workflow')
+    }
+  }
+
+  const fetchManualWorkflows = async () => {
+    setIsLoadingWorkflows(true)
+    try {
+      const response = await fetch(`/api/repos/${params.owner}/${params.repo}/workflows`)
+      if (response.ok) {
+        const data = await response.json()
+        setManualWorkflows(data.workflows || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch manual workflows:', error)
+    } finally {
+      setIsLoadingWorkflows(false)
+    }
+  }
+
+  const fetchBranches = async () => {
+    try {
+      const response = await fetch(`/api/repos/${params.owner}/${params.repo}/branches`)
+      if (response.ok) {
+        const data = await response.json()
+        setBranches(data.branches || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch branches:', error)
+    }
+  }
+
+  const dispatchWorkflow = async (workflowId: number, ref: string, inputs: Record<string, string>) => {
+    try {
+      const response = await fetch(
+        `/api/repos/${params.owner}/${params.repo}/workflows/${workflowId}/dispatch`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ref, inputs }),
+        }
+      )
+
+      if (response.ok) {
+        setSelectedWorkflow(null)
+        fetchWorkflowRuns()
+        setActiveTab('runs')
+        alert('Workflow dispatched successfully! Check the runs tab for progress.')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to dispatch workflow')
+      }
+    } catch (error) {
+      alert('Failed to dispatch workflow')
     }
   }
 
@@ -276,7 +358,9 @@ export default function ActionsPage() {
 
   useEffect(() => {
     fetchWorkflowRuns()
-  }, [fetchWorkflowRuns])
+    fetchManualWorkflows()
+    fetchBranches()
+  }, [fetchWorkflowRuns, params.owner, params.repo])
 
   useEffect(() => {
     if (selectedJob) {
@@ -299,6 +383,44 @@ export default function ActionsPage() {
           Refresh
         </button>
       </div>
+
+      {/* Tabs */}
+      <div className="mb-6">
+        <div className="border-b border-gray-700">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('runs')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'runs'
+                  ? 'border-blue-500 text-blue-400'
+                  : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
+              }`}
+            >
+              Workflow Runs
+            </button>
+            <button
+              onClick={() => setActiveTab('manual')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'manual'
+                  ? 'border-blue-500 text-blue-400'
+                  : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300'
+              }`}
+            >
+              Manual Workflows
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      {/* Workflow Dispatch Modal */}
+      {selectedWorkflow && (
+        <WorkflowDispatchModal
+          workflow={selectedWorkflow}
+          branches={branches}
+          onClose={() => setSelectedWorkflow(null)}
+          onDispatch={dispatchWorkflow}
+        />
+      )}
 
       {/* Job Logs Modal */}
       {selectedJob && (
@@ -329,8 +451,9 @@ export default function ActionsPage() {
         </div>
       )}
 
-      {/* Workflow Runs List */}
-      <div className="bg-gray-800 rounded-lg overflow-hidden">
+      {/* Tab Content */}
+      {activeTab === 'runs' ? (
+        <div className="bg-gray-800 rounded-lg overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-400">Loading...</div>
         ) : workflowRuns.length === 0 ? (
@@ -464,6 +587,245 @@ export default function ActionsPage() {
             ))}
           </div>
         )}
+      </div>
+      ) : (
+        <ManualWorkflowsList
+          workflows={manualWorkflows}
+          isLoading={isLoadingWorkflows}
+          onRunWorkflow={setSelectedWorkflow}
+        />
+      )}
+    </div>
+  )
+}
+
+// Manual Workflows List Component
+function ManualWorkflowsList({
+  workflows,
+  isLoading,
+  onRunWorkflow,
+}: {
+  workflows: Workflow[]
+  isLoading: boolean
+  onRunWorkflow: (workflow: Workflow) => void
+}) {
+  return (
+    <div className="bg-gray-800 rounded-lg overflow-hidden">
+      {isLoading ? (
+        <div className="p-8 text-center text-gray-400">Loading...</div>
+      ) : workflows.length === 0 ? (
+        <div className="p-8 text-center text-gray-400">
+          No manual workflows found. Workflows must have a <code className="bg-gray-700 px-1 rounded">workflow_dispatch</code> trigger to be run manually.
+        </div>
+      ) : (
+        <div className="divide-y divide-gray-700">
+          {workflows.map((workflow) => (
+            <div key={workflow.id} className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <span className="text-xl">⚡</span>
+                  <div>
+                    <h3 className="text-white font-medium">{workflow.name}</h3>
+                    <div className="text-sm text-gray-400">
+                      <span>{workflow.path}</span>
+                      {' · '}
+                      <span className="capitalize">{workflow.state}</span>
+                      {Object.keys(workflow.inputs).length > 0 && (
+                        <>
+                          {' · '}
+                          <span>{Object.keys(workflow.inputs).length} input{Object.keys(workflow.inputs).length > 1 ? 's' : ''}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => onRunWorkflow(workflow)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Run workflow
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Workflow Dispatch Modal Component
+function WorkflowDispatchModal({
+  workflow,
+  branches,
+  onClose,
+  onDispatch,
+}: {
+  workflow: Workflow
+  branches: Branch[]
+  onClose: () => void
+  onDispatch: (workflowId: number, ref: string, inputs: Record<string, string>) => void
+}) {
+  const params = useParams()
+  const [selectedBranch, setSelectedBranch] = useState(branches.find(b => b.name === 'main')?.name || branches[0]?.name || 'main')
+  const [inputs, setInputs] = useState<Record<string, string>>(() => {
+    const defaultInputs: Record<string, string> = {}
+    Object.entries(workflow.inputs).forEach(([key, config]) => {
+      defaultInputs[key] = config.default?.toString() || ''
+    })
+    return defaultInputs
+  })
+  const [workflowInputs, setWorkflowInputs] = useState<Record<string, WorkflowInput>>(workflow.inputs)
+  const [isLoadingInputs, setIsLoadingInputs] = useState(false)
+
+  // Fetch workflow inputs for the selected branch
+  const fetchWorkflowInputsForBranch = async (branchName: string) => {
+    if (!branchName) return
+    
+    setIsLoadingInputs(true)
+    try {
+      const response = await fetch(`/api/repos/${params.owner}/${params.repo}/workflows?ref=${branchName}`)
+      if (response.ok) {
+        const data = await response.json()
+        // Find the current workflow in the response
+        const currentWorkflow = data.workflows.find((w: Workflow) => w.id === workflow.id)
+        if (currentWorkflow && currentWorkflow.inputs) {
+          setWorkflowInputs(currentWorkflow.inputs)
+          
+          // Reset inputs with new defaults
+          const newInputs: Record<string, string> = {}
+          const typedInputs = currentWorkflow.inputs as Record<string, WorkflowInput>
+          Object.entries(typedInputs).forEach(([key, config]) => {
+            newInputs[key] = config.default?.toString() || ''
+          })
+          setInputs(newInputs)
+        }
+      }
+    } catch (error) {
+      // If there's an error, keep the current inputs
+    } finally {
+      setIsLoadingInputs(false)
+    }
+  }
+
+  // Handle branch change
+  const handleBranchChange = (branchName: string) => {
+    setSelectedBranch(branchName)
+    fetchWorkflowInputsForBranch(branchName)
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onDispatch(workflow.id, selectedBranch, inputs)
+  }
+
+  const handleInputChange = (key: string, value: string) => {
+    setInputs(prev => ({ ...prev, [key]: value }))
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="flex justify-between items-center p-4 border-b border-gray-700">
+          <h2 className="text-xl font-bold text-white">Run workflow: {workflow.name}</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white"
+          >
+            ✕
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-4 space-y-4 overflow-auto max-h-[calc(90vh-120px)]">
+          {/* Branch Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Use workflow from
+            </label>
+            <select
+              value={selectedBranch}
+              onChange={(e) => handleBranchChange(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isLoadingInputs}
+            >
+              {branches.map((branch) => (
+                <option key={branch.name} value={branch.name}>
+                  {branch.name}
+                </option>
+              ))}
+            </select>
+            {isLoadingInputs && (
+              <p className="text-sm text-gray-400 mt-1">Loading workflow inputs for {selectedBranch}...</p>
+            )}
+          </div>
+
+          {/* Workflow Inputs */}
+          {Object.entries(workflowInputs).map(([key, config]) => (
+            <div key={key}>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                {key}
+                {config.required && <span className="text-red-400 ml-1">*</span>}
+              </label>
+              {config.description && (
+                <p className="text-sm text-gray-400 mb-2">{config.description}</p>
+              )}
+              {config.type === 'choice' ? (
+                <select
+                  value={inputs[key] || ''}
+                  onChange={(e) => handleInputChange(key, e.target.value)}
+                  required={config.required}
+                  disabled={isLoadingInputs}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  <option value="">Select an option</option>
+                  {config.options?.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              ) : config.type === 'boolean' ? (
+                <select
+                  value={inputs[key] || config.default?.toString() || 'false'}
+                  onChange={(e) => handleInputChange(key, e.target.value)}
+                  disabled={isLoadingInputs}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={inputs[key] || ''}
+                  onChange={(e) => handleInputChange(key, e.target.value)}
+                  placeholder={config.default?.toString() || ''}
+                  required={config.required}
+                  disabled={isLoadingInputs}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                />
+              )}
+            </div>
+          ))}
+
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-400 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoadingInputs}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoadingInputs ? 'Loading...' : 'Run workflow'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )

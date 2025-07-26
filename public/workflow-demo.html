@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Input Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0d1117; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="max-w-4xl mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-8">Manual Workflow Dispatch - Enhanced Input Support</h1>
+        
+        <!-- Workflow Modal Demo -->
+        <div class="bg-gray-800 rounded-lg w-full max-w-2xl">
+            <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                <h2 class="text-xl font-bold text-white">Run workflow: Deploy Application</h2>
+                <button class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <div class="p-4 space-y-4">
+                <!-- Branch Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        Use workflow from
+                    </label>
+                    <select class="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="main">main</option>
+                        <option value="develop">develop</option>
+                        <option value="feature/new-deploy">feature/new-deploy</option>
+                    </select>
+                </div>
+
+                <!-- String Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        string_input
+                        <span class="text-red-400 ml-1">*</span>
+                    </label>
+                    <p class="text-sm text-gray-400 mb-2">A string value</p>
+                    <input
+                        type="text"
+                        value="default text"
+                        placeholder="default text"
+                        required
+                        class="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+
+                <!-- Choice Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        choice_input
+                        <span class="text-red-400 ml-1">*</span>
+                    </label>
+                    <p class="text-sm text-gray-400 mb-2">Pick one option</p>
+                    <select
+                        required
+                        class="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        <option value="">Select an option</option>
+                        <option value="option1">option1</option>
+                        <option value="option2" selected>option2</option>
+                        <option value="option3">option3</option>
+                    </select>
+                </div>
+
+                <!-- Boolean Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        boolean_input
+                        <span class="text-red-400 ml-1">*</span>
+                    </label>
+                    <p class="text-sm text-gray-400 mb-2">Enable feature?</p>
+                    <select class="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="true" selected>true</option>
+                        <option value="false">false</option>
+                    </select>
+                </div>
+
+                <!-- Optional String Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        optional_string
+                    </label>
+                    <p class="text-sm text-gray-400 mb-2">Optional string input</p>
+                    <input
+                        type="text"
+                        value=""
+                        placeholder=""
+                        class="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+                    <button
+                        type="button"
+                        class="px-4 py-2 text-gray-400 hover:text-white"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
+                    >
+                        Run workflow
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 p-4 bg-gray-800 rounded-lg">
+            <h3 class="text-lg font-semibold mb-4">Key Improvements:</h3>
+            <ul class="space-y-2 text-sm text-gray-300">
+                <li class="flex items-start">
+                    <span class="text-green-400 mr-2">✅</span>
+                    <span><strong>Proper YAML Parsing:</strong> Replaced regex-based parsing with js-yaml library for robust workflow input extraction</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-green-400 mr-2">✅</span>
+                    <span><strong>Choice Input Support:</strong> Properly handles choice inputs with options arrays</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-green-400 mr-2">✅</span>
+                    <span><strong>Boolean Input Support:</strong> Dedicated boolean selectors with true/false dropdowns</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-green-400 mr-2">✅</span>
+                    <span><strong>Type Safety:</strong> Added proper TypeScript interfaces for all workflow input types</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-green-400 mr-2">✅</span>
+                    <span><strong>Default Values:</strong> Properly handles default values for all input types</span>
+                </li>
+                <li class="flex items-start">
+                    <span class="text-green-400 mr-2">✅</span>
+                    <span><strong>Required Field Validation:</strong> Visual indicators for required fields with red asterisks</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
