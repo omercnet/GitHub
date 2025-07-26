@@ -34,39 +34,27 @@ export async function GET(
 ) {
   try {
     const { owner, repo, runId } = await params
-    const { searchParams } = new URL(request.url)
-    const offset = parseInt(searchParams.get('offset') || '0')
-    
     const octokit = await getOctokit()
     
     if (!octokit) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    // Get workflow run logs
+    // Get workflow run logs download URL
     const response = await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}/logs', {
       owner,
       repo,
       run_id: parseInt(runId),
     })
 
-    // GitHub returns a redirect URL for logs, we need to fetch the actual content
-    const logsResponse = await fetch(response.url)
-    const logsText = await logsResponse.text()
-
-    // Apply offset for incremental updates
-    const newContent = logsText.slice(offset)
-    const totalLength = logsText.length
-
+    // Return the download URL for the zip file
     return NextResponse.json({
-      content: newContent,
-      totalLength,
-      hasMore: newContent.length > 0,
+      downloadUrl: response.url,
     })
   } catch (error: any) {
-    console.error('Error fetching logs:', error)
+    console.error('Error fetching log download URL:', error)
     return NextResponse.json({ 
-      error: error.response?.data?.message || 'Failed to fetch logs' 
+      error: error.response?.data?.message || 'Failed to fetch log download URL' 
     }, { status: error.status || 500 })
   }
 }
