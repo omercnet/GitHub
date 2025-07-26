@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import LogFormatter from '@/app/components/LogFormatter'
+import { cache, CACHE_TTL } from '@/app/lib/cache'
 
 interface WorkflowRun {
   id: number
@@ -39,44 +40,63 @@ export default function ActionsPage() {
   const [isLoadingJobLogs, setIsLoadingJobLogs] = useState(false)
   const logIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  useEffect(() => {
-    fetchWorkflowRuns()
-  }, [params.owner, params.repo])
-
-  useEffect(() => {
-    if (selectedJob) {
-      startJobLogPolling()
-    } else {
-      stopJobLogPolling()
-    }
-
-    return () => stopJobLogPolling()
-  }, [selectedJob])
-
-  const fetchWorkflowRuns = async () => {
+  const fetchWorkflowRuns = useCallback(async (forceRefresh = false) => {
     setIsLoading(true)
+    
+    const cacheKey = cache.getWorkflowRunsKey(params.owner as string, params.repo as string)
+    
+    // Try to get from cache if not forcing refresh
+    if (!forceRefresh) {
+      const cachedData = cache.get<WorkflowRun[]>(cacheKey)
+      if (cachedData) {
+        setWorkflowRuns(cachedData)
+        setIsLoading(false)
+        return
+      }
+    }
+    
     try {
       const response = await fetch(`/api/repos/${params.owner}/${params.repo}/actions`)
       if (response.ok) {
         const data = await response.json()
-        setWorkflowRuns(data.workflow_runs || [])
+        const runs = data.workflow_runs || []
+        setWorkflowRuns(runs)
+        
+        // Cache the data
+        cache.set(cacheKey, runs, CACHE_TTL.WORKFLOW_RUNS)
       }
     } catch (error) {
       console.error('Failed to fetch workflow runs:', error)
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [params.owner, params.repo])
 
   const fetchJobsForRun = async (runId: number) => {
+    const cacheKey = cache.getRunJobsKey(params.owner as string, params.repo as string, runId)
+    
+    // Try to get from cache first
+    const cachedJobs = cache.get<Job[]>(cacheKey)
+    if (cachedJobs) {
+      setRunJobs(prev => ({
+        ...prev,
+        [runId]: cachedJobs
+      }))
+      return
+    }
+    
     try {
       const response = await fetch(`/api/repos/${params.owner}/${params.repo}/actions/${runId}/jobs`)
       if (response.ok) {
         const data = await response.json()
+        const jobs = data.jobs || []
         setRunJobs(prev => ({
           ...prev,
-          [runId]: data.jobs || []
+          [runId]: jobs
         }))
+        
+        // Cache the jobs data
+        cache.set(cacheKey, jobs, CACHE_TTL.RUN_JOBS)
       }
     } catch (error) {
       console.error('Failed to fetch jobs for run:', error)
@@ -141,6 +161,20 @@ export default function ActionsPage() {
 
   const fetchJobLogs = async (jobId: number, offset: number) => {
     setIsLoadingJobLogs(true)
+    
+    const cacheKey = cache.getJobLogsKey(params.owner as string, params.repo as string, jobId)
+    
+    // For offset 0, try to get from cache first
+    if (offset === 0) {
+      const cachedLogs = cache.get<{ content: string; totalLength: number }>(cacheKey)
+      if (cachedLogs) {
+        setJobLogs(cachedLogs.content)
+        setJobLogOffset(cachedLogs.totalLength)
+        setIsLoadingJobLogs(false)
+        return
+      }
+    }
+    
     try {
       const response = await fetch(
         `/api/repos/${params.owner}/${params.repo}/actions/jobs/${jobId}?offset=${offset}`
@@ -156,6 +190,22 @@ export default function ActionsPage() {
         }
         
         setJobLogOffset(data.totalLength)
+        
+        // Cache completed job logs (they won't change)
+        if (selectedJob && selectedJob.status === 'completed') {
+          const logData = {
+            content: offset === 0 ? data.content : jobLogs + data.content,
+            totalLength: data.totalLength
+          }
+          cache.set(cacheKey, logData, CACHE_TTL.COMPLETED_JOB_LOGS)
+        } else if (offset === 0) {
+          // Cache running job logs for shorter time
+          const logData = {
+            content: data.content,
+            totalLength: data.totalLength
+          }
+          cache.set(cacheKey, logData, CACHE_TTL.RUNNING_JOB_LOGS)
+        }
       }
     } catch (error) {
       console.error('Failed to fetch job logs:', error)
@@ -164,7 +214,7 @@ export default function ActionsPage() {
     }
   }
 
-  const startJobLogPolling = () => {
+  const startJobLogPolling = useCallback(() => {
     if (!selectedJob) return
     
     logIntervalRef.current = setInterval(() => {
@@ -172,7 +222,8 @@ export default function ActionsPage() {
         fetchJobLogs(selectedJob.id, jobLogOffset)
       }
     }, 5000)
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedJob, jobLogOffset])
 
   const stopJobLogPolling = () => {
     if (logIntervalRef.current) {
@@ -223,12 +274,26 @@ export default function ActionsPage() {
     return sha.substring(0, 7)
   }
 
+  useEffect(() => {
+    fetchWorkflowRuns()
+  }, [fetchWorkflowRuns])
+
+  useEffect(() => {
+    if (selectedJob) {
+      startJobLogPolling()
+    } else {
+      stopJobLogPolling()
+    }
+
+    return () => stopJobLogPolling()
+  }, [selectedJob, startJobLogPolling])
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-white">Actions</h1>
         <button
-          onClick={fetchWorkflowRuns}
+          onClick={() => fetchWorkflowRuns(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
         >
           Refresh
@@ -237,27 +302,27 @@ export default function ActionsPage() {
 
       {/* Job Logs Modal */}
       {selectedJob && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg w-full max-w-6xl max-h-96 overflow-hidden">
-            <div className="flex justify-between items-center p-4 border-b border-gray-700">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg w-full h-full max-w-[95vw] max-h-[95vh] overflow-hidden flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b border-gray-700 flex-shrink-0">
               <h2 className="text-xl font-bold text-white">
                 Job Logs: {selectedJob.name}
               </h2>
               <button
                 onClick={() => setSelectedJob(null)}
-                className="text-gray-400 hover:text-white"
+                className="text-gray-400 hover:text-white text-2xl leading-none"
               >
                 ✕
               </button>
             </div>
-            <div className="p-4 bg-gray-900 h-80 overflow-auto">
+            <div className="p-4 bg-gray-900 flex-1 overflow-auto">
               {isLoadingJobLogs && jobLogs === '' ? (
                 <div className="text-gray-400">Loading job logs...</div>
               ) : (
                 <LogFormatter logs={jobLogs || ''} />
               )}
             </div>
-            <div className="p-4 border-t border-gray-700 text-sm text-gray-400">
+            <div className="p-4 border-t border-gray-700 text-sm text-gray-400 flex-shrink-0">
               Auto-refreshing every 5 seconds for running jobs
             </div>
           </div>
@@ -312,6 +377,16 @@ export default function ActionsPage() {
                         className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm"
                       >
                         Re-run
+                      </button>
+                      <button
+                        onClick={() => {
+                          cache.clear()
+                          fetchWorkflowRuns(true)
+                        }}
+                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                        title="Clear cache and refresh"
+                      >
+                        Clear Cache
                       </button>
                       <a
                         href={run.html_url}
