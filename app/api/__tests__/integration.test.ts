@@ -11,7 +11,6 @@
 
 // Set testing environment variables
 process.env.NODE_ENV = 'test'
-process.env.BYPASS_AUTH_FOR_TESTING = 'true'
 
 const TEST_OWNER = 'omercnet'
 const TEST_REPO = 'GitHub'
@@ -48,7 +47,6 @@ describe('API Route Structure Validation', () => {
       'utf8'
     )
     
-    expect(octokitContent).toMatch(/BYPASS_AUTH_FOR_TESTING/)
     expect(octokitContent).toMatch(/NODE_ENV.*test/)
     expect(octokitContent).toMatch(/new Octokit\(\)/)
 
@@ -96,12 +94,11 @@ describe('Integration Tests with Authentication Bypass', () => {
     console.log('🚀 Starting integration tests with authentication bypass')
     console.log(`   - Target Repository: ${TEST_OWNER}/${TEST_REPO}`)
     console.log(`   - Testing Mode: ${process.env.NODE_ENV === 'test' ? '✅ ENABLED' : '❌ DISABLED'}`)
-    console.log(`   - Auth Bypass: ${process.env.BYPASS_AUTH_FOR_TESTING === 'true' ? '✅ ENABLED' : '❌ DISABLED'}`)
+    console.log(`   - Auth Bypass: ${process.env.NODE_ENV === 'test' ? '✅ ENABLED' : '❌ DISABLED'}`)
   })
 
   it('should validate test environment setup', () => {
     expect(process.env.NODE_ENV).toBe('test')
-    expect(process.env.BYPASS_AUTH_FOR_TESTING).toBe('true')
     expect(TEST_OWNER).toBe('omercnet')
     expect(TEST_REPO).toBe('GitHub')
 
@@ -120,7 +117,6 @@ describe('Integration Tests with Authentication Bypass', () => {
     
     // Should contain bypass logic
     expect(octokitContent).toMatch(/NODE_ENV === 'test'/)
-    expect(octokitContent).toMatch(/BYPASS_AUTH_FOR_TESTING === 'true'/)
     expect(octokitContent).toMatch(/return new Octokit\(\)/)
 
     console.log('✅ Octokit bypass functionality validated')
@@ -382,21 +378,18 @@ describe('Error Handling and Security', () => {
     
     // Should only bypass in very specific conditions
     expect(octokitContent).toMatch(/NODE_ENV === 'test'/)
-    expect(octokitContent).toMatch(/BYPASS_AUTH_FOR_TESTING === 'true'/)
     
     console.log('✅ Production mode authentication enforcement validated')
     console.log('   - Requires iron session in production')
     console.log('   - Returns null without valid token')
-    console.log('   - Bypass only works in test mode with specific flag')
+    console.log('   - Bypass only works in test mode')
   })
 
   it('should validate environment variable controls', () => {
     expect(process.env.NODE_ENV).toBe('test')
-    expect(process.env.BYPASS_AUTH_FOR_TESTING).toBe('true')
     
     console.log('✅ Environment variable controls validated')
     console.log(`   - NODE_ENV: ${process.env.NODE_ENV}`)
-    console.log(`   - BYPASS_AUTH_FOR_TESTING: ${process.env.BYPASS_AUTH_FOR_TESTING}`)
   })
 
   it('should validate bypass only works in specific conditions', () => {
@@ -408,13 +401,11 @@ describe('Error Handling and Security', () => {
       'utf8'
     )
     
-    // Should require both conditions
+    // Should require test environment
     expect(octokitContent).toMatch(/NODE_ENV === 'test'/)
-    expect(octokitContent).toMatch(/BYPASS_AUTH_FOR_TESTING === 'true'/)
     
     console.log('✅ Bypass security conditions validated')
     console.log('   - Requires NODE_ENV=test')
-    console.log('   - Requires BYPASS_AUTH_FOR_TESTING=true')
-    console.log('   - Both conditions must be met for bypass to activate')
+    console.log('   - Bypass activates only in test environment')
   })
 })

@@ -36,7 +36,6 @@ jobs:
       run: npm test -- app/api/__tests__/*.integration.test.ts
       env:
         NODE_ENV: test
-        BYPASS_AUTH_FOR_TESTING: true
 
     - name: Build application
       run: npm run build

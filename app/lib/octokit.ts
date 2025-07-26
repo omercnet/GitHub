@@ -5,7 +5,7 @@ import { SessionData, sessionOptions } from './session'
 
 export async function getOctokit(): Promise<Octokit | null> {
   // For integration testing purposes only - bypass authentication when in test mode
-  if (process.env.NODE_ENV === 'test' && process.env.BYPASS_AUTH_FOR_TESTING === 'true') {
+  if (process.env.NODE_ENV === 'test') {
     // Return an unauthenticated Octokit client for testing public repositories
     return new Octokit()
   }
