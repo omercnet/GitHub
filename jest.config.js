@@ -21,10 +21,11 @@ const customJestConfig = {
   testPathIgnorePatterns: [
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
+    '<rootDir>/app/api/__tests__/utils/',
     '<rootDir>/tests/e2e/', // Exclude Playwright tests
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!(@octokit|universal-user-agent|before-after-hook|deprecation)/)'
+    '/node_modules/(?!(@octokit|universal-user-agent|before-after-hook|deprecation|node-fetch|fetch-blob|formdata-polyfill|web-streams-polyfill)/)'
   ],
 }
 
