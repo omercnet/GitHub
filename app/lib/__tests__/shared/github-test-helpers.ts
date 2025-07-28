@@ -7,7 +7,7 @@
  * Common validation patterns
  */
 export const ValidationPatterns = {
-  GITHUB_TOKEN: /^(ghp_|github_pat_|ghs_|gho_|ghu_|ghr_)/,
+  GITHUB_TOKEN: /^(ghp|gho|ghu|ghs|ghr|github_pat|ghe)_([A-Za-z0-9_]{36,255})$/,
   OWNER_NAME: /^[a-zA-Z0-9-]+$/,
   REPO_NAME: /^[a-zA-Z0-9._-]+$/,
   API_PATH: /^\/[^\/].*/,
