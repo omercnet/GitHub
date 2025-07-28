@@ -22,6 +22,7 @@ const customJestConfig = {
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
     '<rootDir>/app/api/__tests__/utils/',
+    '<rootDir>/app/lib/__tests__/shared/', // Exclude helper files from test discovery
     '<rootDir>/tests/e2e/', // Exclude Playwright tests
   ],
   transformIgnorePatterns: [

@@ -24,34 +24,39 @@ A complete clone of GitHub's user interface built with Next.js 15, featuring dar
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - A GitHub Personal Access Token with appropriate repository permissions
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd GitHub
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Create environment variables:
+
 ```bash
 cp .env.example .env.local
 ```
 
 Edit `.env.local` and set:
+
 ```
 SECRET_COOKIE_PASSWORD=your_secret_password_at_least_32_characters_long
 NODE_ENV=development
 ```
 
 4. Run the development server:
+
 ```bash
 npm run dev
 ```
@@ -71,22 +76,26 @@ npm run dev
 ## Usage
 
 ### Login
+
 1. Enter your GitHub Personal Access Token on the login page
 2. Select a repository from the dropdown list
 
 ### Code Viewer
+
 - Browse repository file structure
 - Click folders to navigate directories
 - Click files to view their contents
 - Use breadcrumb navigation to move between levels
 
 ### Pull Requests
+
 - View all open pull requests
 - Create new pull requests with title, head/base branches, and description
 - Merge pull requests directly from the interface
 - View CI/CD status checks and detailed check run results
 
 ### GitHub Actions
+
 - View all workflow runs with status indicators
 - Access real-time logs for running workflows
 - Re-run failed workflows
@@ -151,17 +160,20 @@ All tests are built with Jest and follow testing best practices for Next.js appl
 ## Architecture
 
 ### Session Management
+
 - Uses iron-session for secure, encrypted cookie-based sessions
 - PAT tokens are stored server-side and never exposed to the client
 - Automatic session validation on all API requests
 
 ### Incremental Log Updates
+
 - Implements stateless log streaming using offset-based requests
 - Client tracks current log length and requests only new content
 - Compatible with serverless environments (no server-side caching required)
 - Automatic refresh every 5 seconds for running workflows
 
 ### Error Handling
+
 - Comprehensive error handling with user-friendly messages
 - Rate limiting awareness for GitHub API calls
 - Graceful handling of network failures and API errors
@@ -169,6 +181,7 @@ All tests are built with Jest and follow testing best practices for Next.js appl
 ## Deployment
 
 ### Vercel (Recommended)
+
 1. Connect your GitHub repository to Vercel
 2. Set environment variables in Vercel dashboard:
    - `SECRET_COOKIE_PASSWORD`
@@ -176,7 +189,9 @@ All tests are built with Jest and follow testing best practices for Next.js appl
 3. Deploy automatically on push to main branch
 
 ### Other Platforms
+
 The application is compatible with any platform supporting Next.js 15:
+
 - Netlify
 - Railway
 - DigitalOcean App Platform
@@ -197,6 +212,7 @@ This project uses GitHub Actions for continuous integration, code quality checks
 ### Available Workflows
 
 #### 1. CI Workflow (`.github/workflows/ci.yml`)
+
 - **Triggers**: Push to main, Pull requests to main
 - **Node.js Versions**: Tests on both Node.js 18.x and 20.x
 - **Actions Used**:
@@ -209,6 +225,7 @@ This project uses GitHub Actions for continuous integration, code quality checks
   - Verify build artifacts
 
 #### 2. Code Quality Workflow (`.github/workflows/code-quality.yml`)
+
 - **Triggers**: Pull requests to main
 - **Features**:
   - **Reviewdog ESLint**: Automated code review with inline comments
@@ -218,7 +235,8 @@ This project uses GitHub Actions for continuous integration, code quality checks
   - Standard Node.js setup actions
 
 #### 3. Security Audit Workflow (`.github/workflows/security.yml`)
-- **Triggers**: 
+
+- **Triggers**:
   - Weekly schedule (Mondays at 9 AM UTC)
   - Push to main
   - Pull requests to main
@@ -229,6 +247,7 @@ This project uses GitHub Actions for continuous integration, code quality checks
   - `actions/dependency-review-action@v4` - GitHub's dependency review
 
 #### 4. Deploy to Vercel Workflow (`.github/workflows/deploy.yml`)
+
 - **Triggers**: Push to main, Manual dispatch
 - **Features**:
   - Pre-deployment testing (lint, type-check, build)
@@ -244,9 +263,11 @@ This project uses GitHub Actions for continuous integration, code quality checks
 ### Setting Up GitHub Actions
 
 #### Required Secrets
+
 To enable all workflows, add these secrets in your GitHub repository settings:
 
 1. **For Deployment** (optional):
+
    ```
    VERCEL_TOKEN=your_vercel_token
    VERCEL_ORG_ID=your_vercel_org_id
@@ -275,6 +296,38 @@ The workflows are designed to be easily customizable:
 - **ESLint Rules**: Adjust `eslint_flags` in `code-quality.yml`
 - **Security Schedule**: Change the cron schedule in `security.yml`
 - **Deployment Target**: Replace Vercel action with your preferred platform
+
+## Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run test` - Run unit tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage
+- `npm run test:e2e` - Run end-to-end tests
+
+### Git Hooks
+
+This project uses [Husky](https://typicode.github.io/husky/) with [lint-staged](https://github.com/okonet/lint-staged) to ensure code quality:
+
+- **Pre-commit hook**: Automatically runs ESLint on staged JavaScript/TypeScript files
+- **Automatic setup**: Husky is automatically configured when you run `npm install`
+
+The pre-commit hook will:
+
+1. Run ESLint with `--fix` flag on staged `.js`, `.jsx`, `.ts`, `.tsx` files
+2. Block the commit if there are any linting errors that cannot be auto-fixed
+3. Allow the commit to proceed if all files pass linting
+
+To bypass the pre-commit hook (not recommended):
+
+```bash
+git commit --no-verify
+```
 
 ## Contributing
 
