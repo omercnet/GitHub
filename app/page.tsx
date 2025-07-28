@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 interface Repository {
   id: number
@@ -50,7 +51,7 @@ export default function Home() {
         const error = await response.json()
         alert(error.error || 'Login failed')
       }
-    } catch (error) {
+    } catch {
       alert('Login failed')
     } finally {
       setIsLoading(false)
@@ -164,9 +165,11 @@ export default function Home() {
                     onClick={() => fetchRepositories(org)}
                     className="w-full text-left p-3 bg-gray-700 hover:bg-gray-600 rounded-md transition-colors flex items-center space-x-3"
                   >
-                    <img
+                    <Image
                       src={org.avatar_url}
                       alt={org.name}
+                      width={32}
+                      height={32}
                       className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">

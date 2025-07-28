@@ -94,7 +94,7 @@ export default function PullsPage() {
         const error = await response.json()
         alert(error.error || 'Failed to create pull request')
       }
-    } catch (error) {
+    } catch {
       alert('Failed to create pull request')
     }
   }
@@ -126,7 +126,7 @@ export default function PullsPage() {
         const error = await response.json()
         alert(error.error || 'Failed to merge pull request')
       }
-    } catch (error) {
+    } catch {
       alert('Failed to merge pull request')
     }
   }

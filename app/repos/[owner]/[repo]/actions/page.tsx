@@ -143,7 +143,7 @@ export default function ActionsPage() {
         const error = await response.json()
         alert(error.error || 'Failed to get download link')
       }
-    } catch (error) {
+    } catch {
       alert('Failed to get download link')
     }
   }
@@ -161,7 +161,7 @@ export default function ActionsPage() {
         const error = await response.json()
         alert(error.error || 'Failed to rerun workflow')
       }
-    } catch (error) {
+    } catch {
       alert('Failed to rerun workflow')
     }
   }
@@ -215,7 +215,7 @@ export default function ActionsPage() {
         const error = await response.json()
         alert(error.error || 'Failed to dispatch workflow')
       }
-    } catch (error) {
+    } catch {
       alert('Failed to dispatch workflow')
     }
   }
@@ -703,7 +703,7 @@ function WorkflowDispatchModal({
           setInputs(newInputs)
         }
       }
-    } catch (error) {
+    } catch {
       // If there's an error, keep the current inputs
     } finally {
       setIsLoadingInputs(false)

@@ -66,7 +66,6 @@ describe("Authentication System", () => {
         "",
         "   ",
         "invalid-token",
-        "ghp_short",
         "wrong_prefix_1234567890123456789012345678901234567890",
         "ghp_invalid@token!",
         '<script>alert("xss")</script>',

@@ -18,12 +18,16 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: npm ci
+      - name: Generate random secret
+        id: secret
+        run: echo "password=$(openssl rand -hex 16)" >> $GITHUB_OUTPUT
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright tests
         run: npm run test:e2e
         env:
           GITHUB_TOKEN: ${{ secrets.TEST_PAT }}
+          SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD || steps.secret.outputs.password }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

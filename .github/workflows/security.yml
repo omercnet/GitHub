@@ -3,32 +3,46 @@ name: Security Audit
 on:
   schedule:
     # Run security audit weekly on Mondays at 9 AM UTC
-    - cron: '0 9 * * 1'
+    - cron: "0 9 * * 1"
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   security-audit:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22.x'
-        cache: 'npm'
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "npm"
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run security audit
-      run: npm audit --audit-level=moderate
+      - name: Run security audit
+        run: npm audit --audit-level=moderate
 
-    - name: Check for known vulnerabilities
-      uses: actions/dependency-review-action@v4
-      if: github.event_name == 'pull_request'
+      - name: Check for exposed secrets in tests
+        run: |
+          if grep -r "ghp_\|github_pat_" app/ --exclude-dir=node_modules; then
+            echo "Potential GitHub token found in code"
+            exit 1
+          fi
+
+      - name: Secret scanning
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+
+      - name: Check for known vulnerabilities
+        uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'
