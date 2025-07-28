@@ -27,7 +27,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           eslint_flags: "app/ --ext .ts,.tsx,.js,.jsx"
-          fail_level: warning
+          fail_level: error
 
   type-check:
     runs-on: ubuntu-latest
