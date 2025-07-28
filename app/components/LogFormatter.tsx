@@ -110,7 +110,6 @@ export default function LogFormatter({ logs }: LogFormatterProps) {
           level: line.level,
           expanded: false // We'll handle expansion in the render
         }
-        // groupCounter++  // Not used, incrementing for tracking only
       } else if (line.type === 'group-end') {
         // End current group
         if (currentGroup) {

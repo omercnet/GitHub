@@ -237,8 +237,6 @@ export const ENHANCED_CACHE_TTL = {
   },
 } satisfies Record<string, CacheConfig>;
 
-// Export legacy cache for backward compatibility
-export { cache } from "./cache";
 export const CACHE_TTL = {
   WORKFLOW_RUNS: 2 * 60 * 1000,
   COMPLETED_JOB_LOGS: 60 * 60 * 1000,
