@@ -11,6 +11,18 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  // Ignore patterns for build directories and generated files
+  {
+    ignores: [
+      ".next/**/*",
+      "node_modules/**/*",
+      "dist/**/*",
+      "build/**/*",
+      "*.min.js",
+      "coverage/**/*"
+    ]
+  },
+
   // Next.js recommended rules
   ...compat.extends("next/core-web-vitals"),
 

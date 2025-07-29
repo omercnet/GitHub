@@ -1,7 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { GitPullRequest, Plus, CheckCircle, XCircle, Clock, AlertCircle, User, GitBranch, Calendar, X } from 'lucide-react'
 
 interface PullRequest {
   id: number
@@ -56,11 +61,7 @@ export default function PullsPage() {
     body: '',
   })
 
-  useEffect(() => {
-    fetchPullRequests()
-  }, [params.owner, params.repo])
-
-  const fetchPullRequests = async () => {
+  const fetchPullRequests = useCallback(async () => {
     setIsLoading(true)
     try {
       const response = await fetch(`/api/repos/${params.owner}/${params.repo}/pulls`)
@@ -73,7 +74,11 @@ export default function PullsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [params.owner, params.repo])
+
+  useEffect(() => {
+    fetchPullRequests()
+  }, [fetchPullRequests])
 
   const createPullRequest = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -149,11 +154,20 @@ export default function PullsPage() {
 
   const getStatusIcon = (state: string) => {
     switch (state) {
-      case 'success': return '✅'
-      case 'failure': return '❌'
-      case 'pending': return '🟡'
-      case 'error': return '❌'
-      default: return '⚪'
+      case 'success': return <CheckCircle className="w-4 h-4 text-green-400" />
+      case 'failure': return <XCircle className="w-4 h-4 text-red-400" />
+      case 'pending': return <Clock className="w-4 h-4 text-yellow-400" />
+      case 'error': return <AlertCircle className="w-4 h-4 text-red-400" />
+      default: return <Clock className="w-4 h-4 text-gray-400" />
+    }
+  }
+
+  const getStatusBadge = (state: string) => {
+    switch (state) {
+      case 'open': return <Badge variant="outline" className="border-green-500/30 text-green-400 bg-green-500/10">Open</Badge>
+      case 'closed': return <Badge variant="outline" className="border-red-500/30 text-red-400 bg-red-500/10">Closed</Badge>
+      case 'merged': return <Badge variant="outline" className="border-purple-500/30 text-purple-400 bg-purple-500/10">Merged</Badge>
+      default: return <Badge variant="outline" className="border-gray-500/30 text-gray-400 bg-gray-500/10">{state}</Badge>
     }
   }
 
@@ -162,88 +176,136 @@ export default function PullsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Pull Requests</h1>
-        <button
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <GitPullRequest className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              Pull Requests
+            </h1>
+            <p className="text-gray-400">Manage code reviews and collaboration</p>
+          </div>
+        </div>
+        <Button
           onClick={() => setShowCreateForm(true)}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors"
+          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl transition-all duration-200"
         >
+          <Plus className="w-4 h-4 mr-2" />
           New Pull Request
-        </button>
+        </Button>
       </div>
 
       {/* Create PR Form Modal */}
       {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-xl font-bold text-white mb-4">Create Pull Request</h2>
-            <form onSubmit={createPullRequest} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Head Branch
-                </label>
-                <input
-                  type="text"
-                  value={formData.head}
-                  onChange={(e) => setFormData({ ...formData, head: e.target.value })}
-                  placeholder="feature-branch"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Base Branch
-                </label>
-                <input
-                  type="text"
-                  value={formData.base}
-                  onChange={(e) => setFormData({ ...formData, base: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={formData.body}
-                  onChange={(e) => setFormData({ ...formData, body: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                  rows={3}
-                />
-              </div>
-              <div className="flex space-x-3">
-                <button
-                  type="submit"
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
-                >
-                  Create
-                </button>
-                <button
-                  type="button"
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <Card className="bg-gray-900/95 border-gray-700/50 shadow-2xl w-full max-w-lg">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                    <GitPullRequest className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl text-white">Create Pull Request</CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Propose changes to the repository
+                    </CardDescription>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowCreateForm(false)}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md"
+                  className="text-gray-400 hover:text-white"
                 >
-                  Cancel
-                </button>
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
-            </form>
-          </div>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={createPullRequest} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300">
+                    Title
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-500"
+                    placeholder="Add a descriptive title..."
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                      <GitBranch className="w-3 h-3" />
+                      Head Branch
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.head}
+                      onChange={(e) => setFormData({ ...formData, head: e.target.value })}
+                      placeholder="feature-branch"
+                      className="bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-500 font-mono text-sm"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                      <GitBranch className="w-3 h-3" />
+                      Base Branch
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.base}
+                      onChange={(e) => setFormData({ ...formData, base: e.target.value })}
+                      className="bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-500 font-mono text-sm"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300">
+                    Description
+                  </label>
+                  <textarea
+                    value={formData.body}
+                    onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600/50 rounded-md text-white placeholder-gray-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-colors resize-none"
+                    rows={4}
+                    placeholder="Describe your changes..."
+                  />
+                </div>
+                
+                <div className="flex space-x-3 pt-4">
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800"
+                  >
+                    <GitPullRequest className="w-4 h-4 mr-2" />
+                    Create Pull Request
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCreateForm(false)}
+                    className="border-gray-600/50 text-gray-300 hover:bg-gray-800/50"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       )}
 
@@ -305,42 +367,99 @@ export default function PullsPage() {
       )}
 
       {/* Pull Requests List */}
-      <div className="bg-gray-800 rounded-lg overflow-hidden">
+      <div className="space-y-6">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Loading...</div>
+          <Card className="bg-gray-900/50 border-gray-700/50">
+            <CardContent className="p-8 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <div className="text-gray-400">Loading pull requests...</div>
+            </CardContent>
+          </Card>
         ) : pullRequests.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">No open pull requests</div>
-        ) : (
-          <div className="divide-y divide-gray-700">
-            {pullRequests.map((pr) => (
-              <div key={pr.id} className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-white font-medium">{pr.title}</h3>
-                    <div className="text-sm text-gray-400 mt-1">
-                      #{pr.number} opened on {formatDate(pr.created_at)} by {pr.user.login}
-                    </div>
-                    <div className="text-sm text-gray-400 mt-1">
-                      {pr.head.ref} → {pr.base.ref}
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => viewChecks(pr)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
-                    >
-                      View Checks
-                    </button>
-                    <button
-                      onClick={() => mergePullRequest(pr)}
-                      disabled={pr.mergeable === false}
-                      className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Merge
-                    </button>
-                  </div>
-                </div>
+          <Card className="bg-gray-900/50 border-gray-700/50">
+            <CardContent className="p-12 text-center">
+              <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-6">
+                <GitPullRequest className="w-8 h-8 text-gray-500" />
               </div>
+              <h3 className="text-xl font-semibold text-gray-300 mb-2">No pull requests yet</h3>
+              <p className="text-gray-500 mb-6">Get started by creating your first pull request</p>
+              <Button 
+                onClick={() => setShowCreateForm(true)}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Pull Request
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {pullRequests.map((pr) => (
+              <Card key={pr.id} className="bg-gray-900/50 border-gray-700/50 hover:border-gray-600/50 transition-all duration-200 group">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                          <GitPullRequest className="w-4 h-4 text-white" />
+                        </div>
+                        {getStatusBadge(pr.state)}
+                        <div className="text-gray-400 text-sm">#{pr.number}</div>
+                      </div>
+                      
+                      <h3 className="text-lg font-semibold text-white mb-3 group-hover:text-blue-300 transition-colors">
+                        {pr.title}
+                      </h3>
+                      
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-4">
+                        <div className="flex items-center gap-1">
+                          <User className="w-3 h-3" />
+                          <span>{pr.user.login}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          <span>opened {formatDate(pr.created_at)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <GitBranch className="w-3 h-3" />
+                          <span className="font-mono text-xs bg-gray-800 px-2 py-1 rounded">
+                            {pr.head.ref}
+                          </span>
+                          <span className="mx-1">→</span>
+                          <span className="font-mono text-xs bg-gray-800 px-2 py-1 rounded">
+                            {pr.base.ref}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        onClick={() => viewChecks(pr)}
+                        variant="outline"
+                        size="sm"
+                        className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/50"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        View Checks
+                      </Button>
+                      <Button
+                        onClick={() => mergePullRequest(pr)}
+                        disabled={pr.mergeable === false}
+                        size="sm"
+                        className={`${
+                          pr.mergeable === false 
+                            ? 'bg-gray-600 cursor-not-allowed' 
+                            : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800'
+                        } transition-all duration-200`}
+                      >
+                        <GitPullRequest className="w-4 h-4 mr-2" />
+                        Merge
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}

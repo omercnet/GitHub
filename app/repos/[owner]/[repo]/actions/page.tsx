@@ -166,7 +166,7 @@ export default function ActionsPage() {
     }
   }
 
-  const fetchManualWorkflows = async () => {
+  const fetchManualWorkflows = useCallback(async () => {
     setIsLoadingWorkflows(true)
     try {
       const response = await fetch(`/api/repos/${params.owner}/${params.repo}/workflows`)
@@ -179,9 +179,9 @@ export default function ActionsPage() {
     } finally {
       setIsLoadingWorkflows(false)
     }
-  }
+  }, [params.owner, params.repo])
 
-  const fetchBranches = async () => {
+  const fetchBranches = useCallback(async () => {
     try {
       const response = await fetch(`/api/repos/${params.owner}/${params.repo}/branches`)
       if (response.ok) {
@@ -191,7 +191,7 @@ export default function ActionsPage() {
     } catch (error) {
       console.error('Failed to fetch branches:', error)
     }
-  }
+  }, [params.owner, params.repo])
 
   const dispatchWorkflow = async (workflowId: number, ref: string, inputs: Record<string, string>) => {
     try {
@@ -360,7 +360,7 @@ export default function ActionsPage() {
     fetchWorkflowRuns()
     fetchManualWorkflows()
     fetchBranches()
-  }, [fetchWorkflowRuns, params.owner, params.repo])
+  }, [fetchWorkflowRuns, fetchManualWorkflows, fetchBranches])
 
   useEffect(() => {
     if (selectedJob) {

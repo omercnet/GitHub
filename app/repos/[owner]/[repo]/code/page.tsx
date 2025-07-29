@@ -2,12 +2,43 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import BranchSelector from '@/app/components/BranchSelector'
+import EnhancedFileTable from '@/app/components/EnhancedFileTable'
 
 interface FileItem {
   name: string
   path: string
   type: 'file' | 'dir'
   size?: number
+  lastCommit?: {
+    sha: string
+    message: string
+    author: {
+      name?: string
+      email?: string
+      date?: string
+      avatar_url?: string
+    }
+    url: string
+  } | null
+}
+
+interface GitHubAPIItem {
+  name: string
+  path: string
+  type: 'dir' | 'file'
+  size?: number
+  lastCommit?: {
+    sha: string
+    message: string
+    author: {
+      name?: string
+      email?: string
+      date?: string
+      avatar_url?: string
+    }
+    url: string
+  } | null
 }
 
 interface FileContent {
@@ -19,13 +50,10 @@ interface FileContent {
 export default function CodePage() {
   const params = useParams()
   const [currentPath, setCurrentPath] = useState('')
+  const [currentBranch, setCurrentBranch] = useState('main')
   const [items, setItems] = useState<FileItem[]>([])
   const [fileContent, setFileContent] = useState<FileContent | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-
-  useEffect(() => {
-    loadDirectory('')
-  }, [params.owner, params.repo]) // Add dependencies
 
   const loadDirectory = async (path: string) => {
     setIsLoading(true)
@@ -33,19 +61,20 @@ export default function CodePage() {
     
     try {
       const response = await fetch(
-        `/api/repos/${params.owner}/${params.repo}/contents?path=${encodeURIComponent(path)}`
+        `/api/repos/${params.owner}/${params.repo}/contents?path=${encodeURIComponent(path)}&ref=${encodeURIComponent(currentBranch)}`
       )
       
       if (response.ok) {
         const data = await response.json()
         
         if (Array.isArray(data)) {
-          // Directory contents
-          const fileItems: FileItem[] = data.map((item: any) => ({
+          // Directory contents with enhanced commit info
+          const fileItems: FileItem[] = data.map((item: GitHubAPIItem) => ({
             name: item.name,
             path: item.path,
             type: item.type === 'dir' ? 'dir' : 'file',
             size: item.size,
+            lastCommit: item.lastCommit,
           }))
           
           setItems(fileItems)
@@ -54,15 +83,59 @@ export default function CodePage() {
           // Single file
           loadFile(data)
         }
+      } else {
+        console.error('Failed to load contents')
+        setItems([])
       }
     } catch (error) {
-      console.error('Failed to load directory:', error)
+      console.error('Error loading directory:', error)
+      setItems([])
     } finally {
       setIsLoading(false)
     }
   }
 
-  const loadFile = (data: any) => {
+  useEffect(() => {
+    const loadInitialDirectory = async () => {
+      setIsLoading(true)
+      setFileContent(null)
+      
+      try {
+        const response = await fetch(
+          `/api/repos/${params.owner}/${params.repo}/contents?path=&ref=${encodeURIComponent(currentBranch)}`
+        )
+        
+        if (response.ok) {
+          const data = await response.json()
+          
+          if (Array.isArray(data)) {
+            const fileItems: FileItem[] = data.map((item: GitHubAPIItem) => ({
+              name: item.name,
+              path: item.path,
+              type: item.type === 'dir' ? 'dir' : 'file',
+              size: item.size,
+              lastCommit: item.lastCommit,
+            }))
+            
+            setItems(fileItems)
+            setCurrentPath('')
+          }
+        } else {
+          console.error('Failed to load contents')
+          setItems([])
+        }
+      } catch (error) {
+        console.error('Error loading directory:', error)
+        setItems([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadInitialDirectory()
+  }, [params.owner, params.repo, currentBranch])
+
+  const loadFile = (data: GitHubAPIItem & { content?: string; encoding?: string }) => {
     if (data.content && data.encoding === 'base64') {
       try {
         const content = atob(data.content)
@@ -86,6 +159,11 @@ export default function CodePage() {
     }
   }
 
+  const handleBranchChange = (branch: string) => {
+    setCurrentBranch(branch)
+    setCurrentPath('')
+  }
+
   const navigateUp = () => {
     const pathParts = currentPath.split('/').filter(Boolean)
     pathParts.pop()
@@ -96,6 +174,18 @@ export default function CodePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div className="bg-gray-800 rounded-lg overflow-hidden">
+        {/* Header with Branch Selector */}
+        <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <BranchSelector
+              owner={params.owner as string}
+              repo={params.repo as string}
+              currentBranch={currentBranch}
+              onBranchChange={handleBranchChange}
+            />
+          </div>
+        </div>
+
         {/* Breadcrumb */}
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center space-x-2 text-sm">
@@ -135,33 +225,20 @@ export default function CodePage() {
             </pre>
           </div>
         ) : (
-          /* Directory listing */
-          <div>
+          /* Directory listing with Enhanced File Table */
+          <div className="p-4">
             {currentPath && (
               <div
                 onClick={navigateUp}
-                className="flex items-center p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700"
+                className="flex items-center p-3 hover:bg-gray-700 cursor-pointer mb-4 rounded"
               >
                 <div className="text-blue-400">📁 ..</div>
               </div>
             )}
-            {items.map((item) => (
-              <div
-                key={item.path}
-                onClick={() => handleItemClick(item)}
-                className="flex items-center justify-between p-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
-              >
-                <div className="flex items-center space-x-3">
-                  <span>{item.type === 'dir' ? '📁' : '📄'}</span>
-                  <span className="text-white">{item.name}</span>
-                </div>
-                {item.size !== undefined && (
-                  <span className="text-gray-400 text-sm">
-                    {(item.size / 1024).toFixed(1)} KB
-                  </span>
-                )}
-              </div>
-            ))}
+            <EnhancedFileTable
+              items={items}
+              onItemClick={handleItemClick}
+            />
           </div>
         )}
       </div>
