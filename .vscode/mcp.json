@@ -5,7 +5,10 @@
             "args": [
                 "-y",
                 "@modelcontextprotocol/server-memory"
-            ]
+            ],
+            "env": {
+                "MEMORY_FILE_PATH": "${workspaceFolder}/.vscode/memory.json"
+            }
         },
         "sequential-thinking": {
             "command": "npx",
