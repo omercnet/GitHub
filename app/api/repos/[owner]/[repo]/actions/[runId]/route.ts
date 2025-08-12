@@ -15,25 +15,41 @@ export async function POST(
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    await octokit.request(
-      "POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun",
-      {
-        owner,
-        repo,
-        run_id: parseInt(runId),
-      }
-    );
+    const body = (await request.json().catch(() => ({}))) as {
+      action?: string;
+    };
+    const action = body.action || "rerun";
 
-    return NextResponse.json({ success: true });
+    if (action === "cancel") {
+      await octokit.request(
+        "POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel",
+        { owner, repo, run_id: parseInt(runId, 10) }
+      );
+    } else if (action === "rerun-failed") {
+      await octokit.request(
+        "POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs",
+        { owner, repo, run_id: parseInt(runId, 10) }
+      );
+    } else {
+      // default rerun
+      await octokit.request(
+        "POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun",
+        { owner, repo, run_id: parseInt(runId, 10) }
+      );
+    }
+
+    return NextResponse.json({ success: true, action });
   } catch (error: unknown) {
-    console.error("Error rerunning workflow:", error);
+    console.error("Error performing workflow action:", error);
     const apiError = error as {
       response?: { data?: { message?: string } };
       status?: number;
     };
     return NextResponse.json(
       {
-        error: apiError.response?.data?.message || "Failed to rerun workflow",
+        error:
+          apiError.response?.data?.message ||
+          "Failed to perform workflow action",
       },
       { status: apiError.status || 500 }
     );

@@ -26,10 +26,10 @@ describe('LogFormatter', () => {
   it('renders formatted logs correctly', () => {
     render(<LogFormatter logs={sampleLogs} />)
     
-    // Check that groups are present
-    expect(screen.getByText('📁 Runner Image Provisioner')).toBeInTheDocument()
-    expect(screen.getByText('📁 Operating System')).toBeInTheDocument()
-    expect(screen.getByText('📁 GITHUB_TOKEN Permissions')).toBeInTheDocument()
+    // Check that groups are present (without folder emoji)
+    expect(screen.getByText('Runner Image Provisioner')).toBeInTheDocument()
+    expect(screen.getByText('Operating System')).toBeInTheDocument()
+    expect(screen.getByText('GITHUB_TOKEN Permissions')).toBeInTheDocument()
     
     // Check that standalone log line is visible
     expect(screen.getByText("Current runner version: '2.326.0'")).toBeInTheDocument()
@@ -38,7 +38,7 @@ describe('LogFormatter', () => {
   it('allows expanding and collapsing groups', () => {
     render(<LogFormatter logs={sampleLogs} />)
     
-    const groupButton = screen.getByText('📁 Runner Image Provisioner')
+    const groupButton = screen.getByText('Runner Image Provisioner')
     
     // Initially collapsed
     expect(screen.queryByText('Hosted Compute Agent')).not.toBeInTheDocument()
@@ -65,9 +65,9 @@ describe('LogFormatter', () => {
   it('formats timestamps correctly', () => {
     render(<LogFormatter logs={sampleLogs} />)
     
-    // Should display formatted timestamps (without full date) - checking for multiple
-    const timestamps = screen.getAllByText('06:22:40')
-    expect(timestamps.length).toBeGreaterThan(0)
+    // Check timestamps that exist in the sample data
+    expect(screen.getByText('06:22:40.597')).toBeInTheDocument()
+    expect(screen.getByText('06:22:40.604')).toBeInTheDocument()
   })
 
   it('identifies different log types correctly', () => {
@@ -93,5 +93,28 @@ describe('LogFormatter', () => {
     // Regular logs should have gray styling
     const regularElement = screen.getByText('Regular log line')
     expect(regularElement).toHaveClass('text-gray-300')
+  })
+
+  it('parses ANSI color codes correctly', () => {
+    const ansiLogs = `2025-07-26T06:22:40.5975705Z [36;1mCyan bold text[0m
+2025-07-26T06:22:40.5975705Z [31mRed text[0m
+2025-07-26T06:22:40.5975705Z Regular text without colors`
+
+    render(<LogFormatter logs={ansiLogs} />)
+    
+    // Check that ANSI codes are parsed and create colored spans
+    expect(screen.getByText('Cyan bold text')).toBeInTheDocument()
+    expect(screen.getByText('Red text')).toBeInTheDocument()
+    expect(screen.getByText('Regular text without colors')).toBeInTheDocument()
+  })
+
+  it('handles ANSI reset codes', () => {
+    const resetLogs = `2025-07-26T06:22:40.5975705Z [36mColored[0mReset text`
+    
+    render(<LogFormatter logs={resetLogs} />)
+    
+    // Both parts should be rendered
+    expect(screen.getByText('Colored')).toBeInTheDocument()
+    expect(screen.getByText('Reset text')).toBeInTheDocument()
   })
 })

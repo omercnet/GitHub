@@ -60,16 +60,32 @@ global.TextDecoder = TextDecoder
 // Mock fetch for Node.js environment
 global.fetch = jest.fn()
 
+// Mock window.alert for tests
+global.alert = jest.fn()
+
 // Mock URL constructor for API route testing
 global.URL = jest.fn().mockImplementation((url) => {
-  const urlObj = new (require('url').URL)(url)
-  return {
-    ...urlObj,
-    searchParams: {
-      get: jest.fn().mockImplementation((key) => {
-        const params = new URLSearchParams(urlObj.search)
-        return params.get(key)
-      })
+  try {
+    const urlObj = new (require('url').URL)(url)
+    return {
+      ...urlObj,
+      searchParams: {
+        get: jest.fn(),
+        set: jest.fn(),
+        toString: jest.fn(() => ''),
+      }
+    }
+  } catch {
+    // Return a mock for invalid URLs (like Next.js image URLs)
+    return {
+      href: url,
+      pathname: url,
+      search: '',
+      searchParams: {
+        get: jest.fn(),
+        set: jest.fn(),
+        toString: jest.fn(() => ''),
+      }
     }
   }
 })

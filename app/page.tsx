@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -37,7 +37,30 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [loadingRepos, setLoadingRepos] = useState(false)
+  const [checkingSession, setCheckingSession] = useState(true)
   const router = useRouter()
+
+  // Check for existing session on component mount
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      try {
+        const response = await fetch('/api/session')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.authenticated) {
+            setIsLoggedIn(true)
+            await fetchOrganizations()
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to check existing session:', error)
+      } finally {
+        setCheckingSession(false)
+      }
+    }
+
+    checkExistingSession()
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -109,6 +132,31 @@ export default function Home() {
   const handleBackToOrgs = () => {
     setSelectedOrg(null)
     setRepositories([])
+  }
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/session', { method: 'DELETE' })
+      setIsLoggedIn(false)
+      setOrganizations([])
+      setRepositories([])
+      setSelectedOrg(null)
+      setToken('')
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+  }
+
+  // Show loading screen while checking for existing session
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          <p className="text-gray-400">Checking authentication...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!isLoggedIn) {
@@ -215,41 +263,52 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               {organizations.length > 0 ? (
-                <div className="space-y-3">
-                  {organizations.map((org) => (
-                    <button
-                      key={org.id}
-                      onClick={() => fetchRepositories(org)}
-                      className="w-full text-left p-4 bg-gray-800/40 hover:bg-gray-700/60 rounded-lg transition-all duration-200 flex items-center space-x-3 border border-gray-700/30 hover:border-gray-600/50 group"
+                <>
+                  <div className="space-y-3">
+                    {organizations.map((org) => (
+                      <button
+                        key={org.id}
+                        onClick={() => fetchRepositories(org)}
+                        className="w-full text-left p-4 bg-gray-800/40 hover:bg-gray-700/60 rounded-lg transition-all duration-200 flex items-center space-x-3 border border-gray-700/30 hover:border-gray-600/50 group"
+                      >
+                        <div className="relative">
+                          <Image
+                            src={org.avatar_url}
+                            alt={org.name}
+                            width={40}
+                            height={40}
+                            className="w-10 h-10 rounded-full ring-2 ring-gray-600/50 group-hover:ring-blue-500/30 transition-all duration-200"
+                          />
+                          {org.isPersonal && (
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900"></div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-white font-semibold text-base truncate group-hover:text-blue-300 transition-colors">
+                            {org.name}
+                          </div>
+                          <div className="text-gray-400 text-sm truncate">
+                            {org.isPersonal ? 'Personal repositories' : `@${org.login}`}
+                          </div>
+                        </div>
+                        <div className="text-gray-500 group-hover:text-gray-300 transition-colors">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-gray-700/30">
+                    <Button
+                      onClick={handleLogout}
+                      variant="outline"
+                      className="w-full bg-transparent border-gray-600 text-gray-400 hover:bg-red-900/20 hover:border-red-600 hover:text-red-400 transition-all duration-200"
                     >
-                      <div className="relative">
-                        <Image
-                          src={org.avatar_url}
-                          alt={org.name}
-                          width={40}
-                          height={40}
-                          className="w-10 h-10 rounded-full ring-2 ring-gray-600/50 group-hover:ring-blue-500/30 transition-all duration-200"
-                        />
-                        {org.isPersonal && (
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900"></div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-white font-semibold text-base truncate group-hover:text-blue-300 transition-colors">
-                          {org.name}
-                        </div>
-                        <div className="text-gray-400 text-sm truncate">
-                          {org.isPersonal ? 'Personal repositories' : `@${org.login}`}
-                        </div>
-                      </div>
-                      <div className="text-gray-500 group-hover:text-gray-300 transition-colors">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                      Sign Out
+                    </Button>
+                  </div>
+                </>
               ) : (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
