@@ -19,13 +19,13 @@ export async function GET() {
     const octokit = createOctokit(session.token);
     try {
       const { data: user } = await octokit.request("GET /user");
-      return NextResponse.json({ 
-        authenticated: true, 
+      return NextResponse.json({
+        authenticated: true,
         user: {
           login: user.login,
           name: user.name,
-          avatar_url: user.avatar_url
-        }
+          avatar_url: user.avatar_url,
+        },
       });
     } catch {
       // Token is invalid, clear the session
@@ -44,7 +44,7 @@ export async function DELETE() {
       await cookies(),
       sessionOptions
     );
-    
+
     session.destroy();
     return NextResponse.json({ success: true });
   } catch (error) {

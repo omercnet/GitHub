@@ -11,23 +11,34 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-          cache: "npm"
+          node-version-file: package.json
+          cache: pnpm
+
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
+
       - name: Generate random secret
         id: secret
         run: echo "password=$(openssl rand -hex 16)" >> $GITHUB_OUTPUT
+
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
+
       - name: Run Playwright tests
-        run: npm run test:e2e
+        run: pnpm run test:e2e
         env:
           GITHUB_TOKEN: ${{ secrets.TEST_PAT }}
-          SECRET_COOKIE_PASSWORD: ${{ secrets.SECRET_COOKIE_PASSWORD || steps.secret.outputs.password }}
+          SECRET_COOKIE_PASSWORD: ${{  steps.secret.outputs.password }}
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
