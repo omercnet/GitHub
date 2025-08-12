@@ -40,7 +40,8 @@ const mockJobs = [
     status: 'completed',
     conclusion: 'success',
     started_at: '2025-01-15T10:00:00Z',
-    completed_at: '2025-01-15T10:03:00Z'
+    completed_at: '2025-01-15T10:03:00Z',
+    duration_ms: 180000 // 3 minutes
   },
   {
     id: 102,
@@ -48,7 +49,8 @@ const mockJobs = [
     status: 'completed', 
     conclusion: 'failure',
     started_at: '2025-01-15T10:03:00Z',
-    completed_at: '2025-01-15T10:05:00Z'
+    completed_at: '2025-01-15T10:05:00Z',
+    duration_ms: 120000 // 2 minutes
   }
 ]
 
@@ -127,9 +129,10 @@ describe('RunsList Enhanced Features', () => {
       expect(screen.getByText('build')).toBeInTheDocument()
     })
 
-    // Click logs button for first job
+    // Click the job-level logs button (not the run-level one)
     const logsButtons = screen.getAllByText('Logs')
-    fireEvent.click(logsButtons[0])
+    // The last two are the job-level buttons (one for each job)
+    fireEvent.click(logsButtons[logsButtons.length - 2]) // Click on the build job's logs button
 
     // Should open modal
     await waitFor(() => {
@@ -170,10 +173,13 @@ describe('RunsList Enhanced Features', () => {
     render(<RunsList {...defaultProps} expanded={new Set([1])} />)
     
     await waitFor(() => {
-      // Check for formatted duration (3 minutes = 180000ms)
-      expect(screen.getByText('3m')).toBeInTheDocument()
-      // Check for 2 minutes duration
-      expect(screen.getByText('2m')).toBeInTheDocument()
+      // Check for formatted duration (3 minutes = 180000ms = "3m 0s")
+      // Use getAllByText since duration appears multiple times  
+      const durations3m = screen.getAllByText('3m 0s')
+      expect(durations3m.length).toBeGreaterThan(0)
+      // Check for 2 minutes duration (120000ms = "2m 0s")  
+      const durations2m = screen.getAllByText('2m 0s')
+      expect(durations2m.length).toBeGreaterThan(0)
     })
   })
 })
