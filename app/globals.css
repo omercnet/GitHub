@@ -11,7 +11,8 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  font-family: "Fira Code", "JetBrains Mono", "SF Mono", Monaco, Inconsolata, "Roboto Mono", 
+    "Source Code Pro", monospace, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
 }
 
@@ -55,71 +56,73 @@ body {
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Dracula Theme Light Mode (rarely used, but keeping for compatibility) */
+  --background: oklch(0.971 0.011 45.0); /* Dracula Foreground */
+  --foreground: oklch(0.166 0.023 190.2); /* Dracula Background */
+  --card: oklch(0.971 0.011 45.0);
+  --card-foreground: oklch(0.166 0.023 190.2);
+  --popover: oklch(0.971 0.011 45.0);
+  --popover-foreground: oklch(0.166 0.023 190.2);
+  --primary: oklch(0.640 0.178 327.6); /* Dracula Purple */
+  --primary-foreground: oklch(0.971 0.011 45.0);
+  --secondary: oklch(0.281 0.037 191.1); /* Dracula Selection */
+  --secondary-foreground: oklch(0.971 0.011 45.0);
+  --muted: oklch(0.281 0.037 191.1);
+  --muted-foreground: oklch(0.448 0.103 180.7); /* Dracula Comment */
+  --accent: oklch(0.841 0.170 166.2); /* Dracula Cyan */
+  --accent-foreground: oklch(0.166 0.023 190.2);
+  --destructive: oklch(0.475 0.281 344.9); /* Dracula Red */
+  --border: oklch(0.281 0.037 191.1);
+  --input: oklch(0.281 0.037 191.1);
+  --ring: oklch(0.448 0.103 180.7);
+  --chart-1: oklch(0.640 0.178 327.6); /* Purple */
+  --chart-2: oklch(0.841 0.170 166.2); /* Cyan */
+  --chart-3: oklch(0.803 0.305 160.0); /* Green */
+  --chart-4: oklch(0.759 0.207 351.1); /* Orange */
+  --chart-5: oklch(0.608 0.224 341.2); /* Pink */
+  --sidebar: oklch(0.281 0.037 191.1);
+  --sidebar-foreground: oklch(0.971 0.011 45.0);
+  --sidebar-primary: oklch(0.640 0.178 327.6);
+  --sidebar-primary-foreground: oklch(0.971 0.011 45.0);
+  --sidebar-accent: oklch(0.841 0.170 166.2);
+  --sidebar-accent-foreground: oklch(0.166 0.023 190.2);
+  --sidebar-border: oklch(0.281 0.037 191.1);
+  --sidebar-ring: oklch(0.448 0.103 180.7);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Dracula Theme Dark Mode - Primary theme */
+  --background: oklch(0.166 0.023 190.2); /* Dracula Background #282A36 */
+  --foreground: oklch(0.971 0.011 45.0); /* Dracula Foreground #F8F8F2 */
+  --card: oklch(0.281 0.037 191.1); /* Dracula Selection #44475A */
+  --card-foreground: oklch(0.971 0.011 45.0);
+  --popover: oklch(0.281 0.037 191.1);
+  --popover-foreground: oklch(0.971 0.011 45.0);
+  --primary: oklch(0.640 0.178 327.6); /* Dracula Purple #BD93F9 */
+  --primary-foreground: oklch(0.166 0.023 190.2);
+  --secondary: oklch(0.281 0.037 191.1); /* Dracula Selection */
+  --secondary-foreground: oklch(0.971 0.011 45.0);
+  --muted: oklch(0.281 0.037 191.1);
+  --muted-foreground: oklch(0.448 0.103 180.7); /* Dracula Comment #6272A4 */
+  --accent: oklch(0.841 0.170 166.2); /* Dracula Cyan #8BE9FD */
+  --accent-foreground: oklch(0.166 0.023 190.2);
+  --destructive: oklch(0.475 0.281 344.9); /* Dracula Red #FF5555 */
+  --border: oklch(0.281 0.037 191.1); /* Dracula Selection */
+  --input: oklch(0.281 0.037 191.1 / 80%); /* Selection with transparency */
+  --ring: oklch(0.640 0.178 327.6); /* Purple for focus rings */
+  --chart-1: oklch(0.640 0.178 327.6); /* Purple */
+  --chart-2: oklch(0.841 0.170 166.2); /* Cyan */
+  --chart-3: oklch(0.803 0.305 160.0); /* Green #50FA7B */
+  --chart-4: oklch(0.759 0.207 351.1); /* Orange #FFB86C */
+  --chart-5: oklch(0.608 0.224 341.2); /* Pink #FF79C6 */
+  --sidebar: oklch(0.166 0.023 190.2);
+  --sidebar-foreground: oklch(0.971 0.011 45.0);
+  --sidebar-primary: oklch(0.640 0.178 327.6);
+  --sidebar-primary-foreground: oklch(0.166 0.023 190.2);
+  --sidebar-accent: oklch(0.281 0.037 191.1);
+  --sidebar-accent-foreground: oklch(0.971 0.011 45.0);
+  --sidebar-border: oklch(0.281 0.037 191.1);
+  --sidebar-ring: oklch(0.640 0.178 327.6);
 }
 
 @layer base {

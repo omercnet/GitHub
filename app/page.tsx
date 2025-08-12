@@ -150,10 +150,10 @@ export default function Home() {
   // Show loading screen while checking for existing session
   if (checkingSession) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-          <p className="text-gray-400">Checking authentication...</p>
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-muted-foreground">Checking authentication...</p>
         </div>
       </div>
     )
@@ -161,24 +161,23 @@ export default function Home() {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent"></div>
-        <Card className="relative bg-gray-900/80 backdrop-blur-sm border-gray-700/50 shadow-2xl w-full max-w-md">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="bg-card border-border shadow-2xl w-full max-w-md">
           <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4">
-              <Github className="w-8 h-8 text-white" />
+            <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-4">
+              <Github className="w-8 h-8 text-background" />
             </div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            <CardTitle className="text-2xl font-bold text-foreground">
               GitHub UI Clone
             </CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription className="text-muted-foreground">
               Connect with your GitHub account to get started
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="token" className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                <label htmlFor="token" className="text-sm font-medium text-foreground flex items-center gap-2">
                   <Key className="w-4 h-4" />
                   Personal Access Token
                 </label>
@@ -187,7 +186,7 @@ export default function Home() {
                   id="token"
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
-                  className="bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-500 focus:border-blue-500/50 focus:ring-blue-500/20"
+                  className="bg-input border-border text-foreground placeholder-muted-foreground focus:border-ring focus:ring-ring/20"
                   placeholder="ghp_..."
                   required
                 />
@@ -195,7 +194,7 @@ export default function Home() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 {isLoading ? (
                   <>
@@ -213,26 +212,26 @@ export default function Home() {
             
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-700/50"></div>
+                <div className="w-full border-t border-border"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-gray-900 px-2 text-gray-500">Need a token?</span>
+                <span className="bg-card px-2 text-muted-foreground">Need a token?</span>
               </div>
             </div>
             
-            <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
-              <p className="text-sm text-gray-400 text-center">
+            <div className="bg-muted/30 rounded-lg p-4 border border-border">
+              <p className="text-sm text-muted-foreground text-center">
                 Generate your token at{' '}
                 <a
                   href="https://github.com/settings/tokens"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                  className="text-accent hover:text-accent/80 underline underline-offset-2 transition-colors"
                 >
                   github.com/settings/tokens
                 </a>
               </p>
-              <div className="mt-3 text-xs text-gray-500 space-y-1">
+              <div className="mt-3 text-xs text-muted-foreground space-y-1">
                 <p>Required scopes: repo, user, read:org</p>
                 <p>• Access public and private repositories</p>
                 <p>• Read user profile and organization data</p>
