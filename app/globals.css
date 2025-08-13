@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Import Dracula-themed fonts */
+@import "@fontsource-variable/fira-code";
+@import "@fontsource-variable/jetbrains-mono";
+
 @custom-variant dark (&:is(.dark *));
 
 @source "./";
@@ -11,9 +15,9 @@
 }
 
 body {
-  font-family: "Fira Code", "JetBrains Mono", "SF Mono", Monaco, Inconsolata, "Roboto Mono", 
-    "Source Code Pro", monospace, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  font-family: "Fira Code Variable", "JetBrains Mono Variable", "Fira Code", "JetBrains Mono", 
+    "SF Mono", Monaco, Inconsolata, "Roboto Mono", "Source Code Pro", monospace, system-ui, 
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 @theme inline {

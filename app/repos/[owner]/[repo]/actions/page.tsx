@@ -94,14 +94,14 @@ export default function ActionsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Actions</h1>
-        <button onClick={() => fetchEnrichedRuns()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors">Refresh</button>
+        <h1 className="text-2xl font-bold text-foreground">Actions</h1>
+        <button onClick={() => fetchEnrichedRuns()} className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md transition-colors">Refresh</button>
       </div>
       <div className="flex gap-6">
         <SidebarWorkflows workflows={workflowsMeta} activeWorkflowId={filters.workflow_id} onSelect={onSelectWorkflow} />
         <div className="flex-1">
           <RunsFilterBar filters={filters} onChange={patch => setFilters(f => ({ ...f, ...patch }))} branches={branches.map(b => b.name)} workflows={workflowsMeta} />
-          <div className="bg-gray-800 rounded-lg overflow-hidden">
+          <div className="bg-card rounded-lg overflow-hidden">
             <RunsList runs={enrichedRuns} onExpand={toggleRunExpansion} expanded={expandedRuns} onAction={handleRunAction} loading={isLoadingRuns} owner={params.owner as string} repo={params.repo as string} />
           </div>
         </div>
