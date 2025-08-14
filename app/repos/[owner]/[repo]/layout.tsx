@@ -50,14 +50,14 @@ export default async function RepoLayout({
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/10 via-transparent to-transparent"></div>
       
       {/* Header */}
-      <div className="relative border-b border-gray-700/50 bg-gray-900/80 backdrop-blur-sm">
+      <div className="relative border-b border-border bg-card/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
             {/* Breadcrumb */}
             <div className="flex items-center space-x-2 text-lg mb-4">
               <Link
                 href="/"
-                className="text-gray-400 hover:text-blue-400 transition-colors flex items-center space-x-2 group"
+                className="text-muted-foreground hover:text-accent transition-colors flex items-center space-x-2 group"
               >
                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                 <span>Back to Organizations</span>
@@ -68,9 +68,9 @@ export default async function RepoLayout({
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 text-2xl mb-2">
-                  <span className="text-blue-400 font-medium">{owner}</span>
-                  <span className="text-gray-500">/</span>
-                  <span className="text-white font-bold">{repo}</span>
+                  <span className="text-accent font-medium">{owner}</span>
+                  <span className="text-muted-foreground">/</span>
+                  <span className="text-foreground font-bold">{repo}</span>
                   {repository?.visibility && (
                     <span className={`px-2 py-1 text-xs rounded-full border ${
                       repository.visibility === 'private' 
@@ -83,7 +83,7 @@ export default async function RepoLayout({
                 </div>
                 
                 {repository?.description && (
-                  <p className="text-gray-300 text-lg mb-3 max-w-3xl">{repository.description}</p>
+                  <p className="text-card-foreground text-lg mb-3 max-w-3xl">{repository.description}</p>
                 )}
                 
                 {/* Topics */}
@@ -105,23 +105,23 @@ export default async function RepoLayout({
               {repository && (
                 <div className="flex items-center space-x-6 text-sm">
                   {repository.language && (
-                    <div className="flex items-center space-x-2 text-gray-300">
-                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <div className="flex items-center space-x-2 text-card-foreground">
+                      <div className="w-3 h-3 rounded-full bg-primary"></div>
                       <span>{repository.language}</span>
                     </div>
                   )}
                   
-                  <div className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors cursor-pointer">
+                  <div className="flex items-center space-x-1 text-card-foreground hover:text-foreground transition-colors cursor-pointer">
                     <Star className="w-4 h-4" />
                     <span>{repository.stargazers_count.toLocaleString()}</span>
                   </div>
                   
-                  <div className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors cursor-pointer">
+                  <div className="flex items-center space-x-1 text-card-foreground hover:text-foreground transition-colors cursor-pointer">
                     <GitFork className="w-4 h-4" />
                     <span>{repository.forks_count.toLocaleString()}</span>
                   </div>
                   
-                  <div className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors cursor-pointer">
+                  <div className="flex items-center space-x-1 text-card-foreground hover:text-foreground transition-colors cursor-pointer">
                     <Eye className="w-4 h-4" />
                     <span>{repository.watchers_count.toLocaleString()}</span>
                   </div>
@@ -131,14 +131,14 @@ export default async function RepoLayout({
           </div>
           
           {/* Navigation Tabs */}
-          <nav className="flex space-x-0 border-b border-gray-700/30">
+          <nav className="flex space-x-0 border-b border-border/30">
             {tabs.map((tab) => {
               const Icon = tab.icon
               return (
                 <Link
                   key={tab.name}
                   href={tab.href}
-                  className="flex items-center space-x-2 py-4 px-6 border-b-2 border-transparent text-gray-400 hover:text-white hover:border-blue-400/50 transition-all duration-200 group"
+                  className="flex items-center space-x-2 py-4 px-6 border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-accent/50 transition-all duration-200 group"
                 >
                   <Icon className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   <span className="font-medium">{tab.name}</span>

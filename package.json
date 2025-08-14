@@ -19,6 +19,8 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@fontsource-variable/fira-code": "^5.2.6",
+    "@fontsource-variable/jetbrains-mono": "^5.2.6",
     "@octokit/core": "^7.0.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@tailwindcss/postcss": "^4.1.11",

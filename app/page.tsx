@@ -150,10 +150,10 @@ export default function Home() {
   // Show loading screen while checking for existing session
   if (checkingSession) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-          <p className="text-gray-400">Checking authentication...</p>
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-muted-foreground">Checking authentication...</p>
         </div>
       </div>
     )
@@ -161,24 +161,23 @@ export default function Home() {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent"></div>
-        <Card className="relative bg-gray-900/80 backdrop-blur-sm border-gray-700/50 shadow-2xl w-full max-w-md">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="bg-card border-border shadow-2xl w-full max-w-md">
           <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4">
-              <Github className="w-8 h-8 text-white" />
+            <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-4">
+              <Github className="w-8 h-8 text-background" />
             </div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            <CardTitle className="text-2xl font-bold text-foreground">
               GitHub UI Clone
             </CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription className="text-muted-foreground">
               Connect with your GitHub account to get started
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="token" className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                <label htmlFor="token" className="text-sm font-medium text-foreground flex items-center gap-2">
                   <Key className="w-4 h-4" />
                   Personal Access Token
                 </label>
@@ -187,7 +186,7 @@ export default function Home() {
                   id="token"
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
-                  className="bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-500 focus:border-blue-500/50 focus:ring-blue-500/20"
+                  className="bg-input border-border text-foreground placeholder-muted-foreground focus:border-ring focus:ring-ring/20"
                   placeholder="ghp_..."
                   required
                 />
@@ -195,7 +194,7 @@ export default function Home() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 {isLoading ? (
                   <>
@@ -213,26 +212,26 @@ export default function Home() {
             
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-700/50"></div>
+                <div className="w-full border-t border-border"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-gray-900 px-2 text-gray-500">Need a token?</span>
+                <span className="bg-card px-2 text-muted-foreground">Need a token?</span>
               </div>
             </div>
             
-            <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/30">
-              <p className="text-sm text-gray-400 text-center">
+            <div className="bg-muted/30 rounded-lg p-4 border border-border">
+              <p className="text-sm text-muted-foreground text-center">
                 Generate your token at{' '}
                 <a
                   href="https://github.com/settings/tokens"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                  className="text-accent hover:text-accent/80 underline underline-offset-2 transition-colors"
                 >
                   github.com/settings/tokens
                 </a>
               </p>
-              <div className="mt-3 text-xs text-gray-500 space-y-1">
+              <div className="mt-3 text-xs text-muted-foreground space-y-1">
                 <p>Required scopes: repo, user, read:org</p>
                 <p>• Access public and private repositories</p>
                 <p>• Read user profile and organization data</p>
@@ -245,19 +244,18 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/10 via-transparent to-transparent"></div>
-      <Card className="relative bg-gray-900/80 backdrop-blur-sm border-gray-700/50 shadow-2xl w-full max-w-md">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="bg-card border-border shadow-2xl w-full max-w-md">
         {!selectedOrg ? (
           <>
             <CardHeader className="text-center space-y-2">
-              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-2">
-                <Github className="w-6 h-6 text-white" />
+              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-2">
+                <Github className="w-6 h-6 text-background" />
               </div>
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              <CardTitle className="text-xl font-bold text-foreground">
                 Select Organization
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-muted-foreground">
                 Choose an organization to view its repositories
               </CardDescription>
             </CardHeader>
@@ -269,7 +267,7 @@ export default function Home() {
                       <button
                         key={org.id}
                         onClick={() => fetchRepositories(org)}
-                        className="w-full text-left p-4 bg-gray-800/40 hover:bg-gray-700/60 rounded-lg transition-all duration-200 flex items-center space-x-3 border border-gray-700/30 hover:border-gray-600/50 group"
+                        className="w-full text-left p-4 bg-muted/40 hover:bg-muted/60 rounded-lg transition-all duration-200 flex items-center space-x-3 border border-border hover:border-ring/50 group"
                       >
                         <div className="relative">
                           <Image
@@ -277,21 +275,21 @@ export default function Home() {
                             alt={org.name}
                             width={40}
                             height={40}
-                            className="w-10 h-10 rounded-full ring-2 ring-gray-600/50 group-hover:ring-blue-500/30 transition-all duration-200"
+                            className="w-10 h-10 rounded-full ring-2 ring-border group-hover:ring-primary/30 transition-all duration-200"
                           />
                           {org.isPersonal && (
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-900"></div>
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-chart-3 rounded-full border-2 border-card"></div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-white font-semibold text-base truncate group-hover:text-blue-300 transition-colors">
+                          <div className="text-foreground font-semibold text-base truncate group-hover:text-accent transition-colors">
                             {org.name}
                           </div>
-                          <div className="text-gray-400 text-sm truncate">
+                          <div className="text-muted-foreground text-sm truncate">
                             {org.isPersonal ? 'Personal repositories' : `@${org.login}`}
                           </div>
                         </div>
-                        <div className="text-gray-500 group-hover:text-gray-300 transition-colors">
+                        <div className="text-muted-foreground group-hover:text-foreground transition-colors">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
@@ -299,11 +297,11 @@ export default function Home() {
                       </button>
                     ))}
                   </div>
-                  <div className="mt-6 pt-4 border-t border-gray-700/30">
+                  <div className="mt-6 pt-4 border-t border-border">
                     <Button
                       onClick={handleLogout}
                       variant="outline"
-                      className="w-full bg-transparent border-gray-600 text-gray-400 hover:bg-red-900/20 hover:border-red-600 hover:text-red-400 transition-all duration-200"
+                      className="w-full bg-transparent border-border text-muted-foreground hover:bg-destructive/20 hover:border-destructive hover:text-destructive transition-all duration-200"
                     >
                       Sign Out
                     </Button>
@@ -311,8 +309,8 @@ export default function Home() {
                 </>
               ) : (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                  <div className="text-gray-400 text-sm">Loading organizations...</div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <div className="text-muted-foreground text-sm">Loading organizations...</div>
                 </div>
               )}
             </CardContent>
@@ -323,7 +321,7 @@ export default function Home() {
               <div className="flex items-center justify-between">
                 <button
                   onClick={handleBackToOrgs}
-                  className="text-gray-400 hover:text-white transition-colors flex items-center space-x-2 text-sm group"
+                  className="text-muted-foreground hover:text-foreground transition-colors flex items-center space-x-2 text-sm group"
                 >
                   <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -338,13 +336,13 @@ export default function Home() {
                     alt={selectedOrg.name}
                     width={40}
                     height={40}
-                    className="w-10 h-10 rounded-full ring-2 ring-gray-600/50"
+                    className="w-10 h-10 rounded-full ring-2 ring-border"
                   />
                   <div>
-                    <CardTitle className="text-xl font-bold text-white">
+                    <CardTitle className="text-xl font-bold text-foreground">
                       {selectedOrg.name}
                     </CardTitle>
-                    <CardDescription className="text-gray-400">
+                    <CardDescription className="text-muted-foreground">
                       {selectedOrg.isPersonal ? 'Personal repositories' : `@${selectedOrg.login}`}
                     </CardDescription>
                   </div>
@@ -354,8 +352,8 @@ export default function Home() {
             <CardContent>
               {loadingRepos ? (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                  <div className="text-gray-400 text-sm">Loading repositories...</div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <div className="text-muted-foreground text-sm">Loading repositories...</div>
                 </div>
               ) : repositories.length > 0 ? (
                 <div className="space-y-3">
@@ -363,25 +361,25 @@ export default function Home() {
                     <button
                       key={repo.id}
                       onClick={() => handleRepoSelect(repo.full_name)}
-                      className="w-full text-left p-4 bg-gray-800/40 hover:bg-gray-700/60 rounded-lg transition-all duration-200 border border-gray-700/30 hover:border-gray-600/50 group"
+                      className="w-full text-left p-4 bg-muted/40 hover:bg-muted/60 rounded-lg transition-all duration-200 border border-border hover:border-ring/50 group"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
-                          <div className="text-white font-semibold text-base truncate group-hover:text-blue-300 transition-colors">
+                          <div className="text-foreground font-semibold text-base truncate group-hover:text-accent transition-colors">
                             {repo.name}
                           </div>
-                          <div className="text-gray-400 text-sm truncate mb-2">
+                          <div className="text-muted-foreground text-sm truncate mb-2">
                             {repo.full_name}
                           </div>
                           {repo.description && (
-                            <div className="text-gray-500 text-sm line-clamp-2 mb-3">
+                            <div className="text-muted-foreground/80 text-sm line-clamp-2 mb-3">
                               {repo.description}
                             </div>
                           )}
-                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                          <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                             {repo.language && (
                               <div className="flex items-center space-x-1">
-                                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                <div className="w-3 h-3 rounded-full bg-chart-2"></div>
                                 <span>{repo.language}</span>
                               </div>
                             )}
@@ -403,7 +401,7 @@ export default function Home() {
                             )}
                           </div>
                         </div>
-                        <div className="text-gray-500 group-hover:text-gray-300 transition-colors ml-3">
+                        <div className="text-muted-foreground group-hover:text-foreground transition-colors ml-3">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
@@ -414,11 +412,11 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4">
-                    <Github className="w-6 h-6 text-gray-500" />
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                    <Github className="w-6 h-6 text-muted-foreground" />
                   </div>
-                  <div className="text-gray-400 text-sm">No repositories found</div>
-                  <div className="text-gray-500 text-xs mt-1">This organization has no accessible repositories</div>
+                  <div className="text-muted-foreground text-sm">No repositories found</div>
+                  <div className="text-muted-foreground/60 text-xs mt-1">This organization has no accessible repositories</div>
                 </div>
               )}
             </CardContent>

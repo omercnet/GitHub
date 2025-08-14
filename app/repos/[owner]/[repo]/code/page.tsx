@@ -173,9 +173,9 @@ export default function CodePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="bg-gray-800 rounded-lg overflow-hidden">
+      <div className="bg-card rounded-lg overflow-hidden">
         {/* Header with Branch Selector */}
-        <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+        <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <BranchSelector
               owner={params.owner as string}
@@ -187,11 +187,11 @@ export default function CodePage() {
         </div>
 
         {/* Breadcrumb */}
-        <div className="p-4 border-b border-gray-700">
+        <div className="p-4 border-b border-border">
           <div className="flex items-center space-x-2 text-sm">
             <button
               onClick={() => loadDirectory('')}
-              className="text-blue-400 hover:underline"
+              className="text-accent hover:underline"
             >
               {params.repo}
             </button>
@@ -199,10 +199,10 @@ export default function CodePage() {
               const segmentPath = array.slice(0, index + 1).join('/')
               return (
                 <span key={segmentPath} className="flex items-center space-x-2">
-                  <span className="text-gray-400">/</span>
+                  <span className="text-muted-foreground">/</span>
                   <button
                     onClick={() => loadDirectory(segmentPath)}
-                    className="text-blue-400 hover:underline"
+                    className="text-accent hover:underline"
                   >
                     {segment}
                   </button>
@@ -213,14 +213,14 @@ export default function CodePage() {
         </div>
 
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Loading...</div>
+          <div className="p-8 text-center text-muted-foreground">Loading...</div>
         ) : fileContent ? (
           /* File content view */
           <div>
-            <div className="p-4 border-b border-gray-700 bg-gray-750">
-              <h3 className="text-white font-medium">{fileContent.name}</h3>
+            <div className="p-4 border-b border-border bg-muted">
+              <h3 className="text-foreground font-medium">{fileContent.name}</h3>
             </div>
-            <pre className="p-4 text-sm text-gray-300 overflow-auto bg-gray-900">
+            <pre className="p-4 text-sm text-muted-foreground overflow-auto bg-background">
               <code>{fileContent.content}</code>
             </pre>
           </div>
@@ -230,9 +230,9 @@ export default function CodePage() {
             {currentPath && (
               <div
                 onClick={navigateUp}
-                className="flex items-center p-3 hover:bg-gray-700 cursor-pointer mb-4 rounded"
+                className="flex items-center p-3 hover:bg-muted cursor-pointer mb-4 rounded"
               >
-                <div className="text-blue-400">📁 ..</div>
+                <div className="text-accent">📁 ..</div>
               </div>
             )}
             <EnhancedFileTable
