@@ -95,24 +95,24 @@ body {
 }
 
 .dark {
-  /* Dracula Theme Dark Mode - Primary theme */
+  /* Dracula Theme Dark Mode - Darker composition for professional appearance */
   --background: oklch(0.166 0.023 190.2); /* Dracula Background #282A36 */
   --foreground: oklch(0.971 0.011 45.0); /* Dracula Foreground #F8F8F2 */
-  --card: oklch(0.281 0.037 191.1); /* Dracula Selection #44475A */
+  --card: oklch(0.166 0.023 190.2); /* Same as background for unified dark look */
   --card-foreground: oklch(0.971 0.011 45.0);
-  --popover: oklch(0.281 0.037 191.1);
+  --popover: oklch(0.180 0.024 190.2); /* Barely lighter for subtle contrast */
   --popover-foreground: oklch(0.971 0.011 45.0);
   --primary: oklch(0.640 0.178 327.6); /* Dracula Purple #BD93F9 */
   --primary-foreground: oklch(0.166 0.023 190.2);
-  --secondary: oklch(0.281 0.037 191.1); /* Dracula Selection */
+  --secondary: oklch(0.180 0.024 190.2); /* Barely lighter than background */
   --secondary-foreground: oklch(0.971 0.011 45.0);
-  --muted: oklch(0.281 0.037 191.1);
+  --muted: oklch(0.180 0.024 190.2); /* Subtle contrast, not bright */
   --muted-foreground: oklch(0.448 0.103 180.7); /* Dracula Comment #6272A4 */
   --accent: oklch(0.841 0.170 166.2); /* Dracula Cyan #8BE9FD */
   --accent-foreground: oklch(0.166 0.023 190.2);
   --destructive: oklch(0.475 0.281 344.9); /* Dracula Red #FF5555 */
-  --border: oklch(0.281 0.037 191.1); /* Dracula Selection */
-  --input: oklch(0.281 0.037 191.1 / 80%); /* Selection with transparency */
+  --border: oklch(0.200 0.025 190.2); /* Very subtle borders, barely visible */
+  --input: oklch(0.180 0.024 190.2); /* Barely lighter than background */
   --ring: oklch(0.640 0.178 327.6); /* Purple for focus rings */
   --chart-1: oklch(0.640 0.178 327.6); /* Purple */
   --chart-2: oklch(0.841 0.170 166.2); /* Cyan */
@@ -123,9 +123,9 @@ body {
   --sidebar-foreground: oklch(0.971 0.011 45.0);
   --sidebar-primary: oklch(0.640 0.178 327.6);
   --sidebar-primary-foreground: oklch(0.166 0.023 190.2);
-  --sidebar-accent: oklch(0.281 0.037 191.1);
+  --sidebar-accent: oklch(0.180 0.024 190.2); /* Much more subtle */
   --sidebar-accent-foreground: oklch(0.971 0.011 45.0);
-  --sidebar-border: oklch(0.281 0.037 191.1);
+  --sidebar-border: oklch(0.200 0.025 190.2); /* Subtle borders */
   --sidebar-ring: oklch(0.640 0.178 327.6);
 }
 
