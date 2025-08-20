@@ -8,13 +8,13 @@ test.describe("CSS Validation Tests", () => {
     const cssLinks = await page.locator('link[rel="stylesheet"]').count();
     expect(cssLinks).toBeGreaterThan(0);
 
-    // Check dark theme classes
+    // Check dark theme classes using semantic tokens
     const html = page.locator("html");
     await expect(html).toHaveClass(/dark/);
 
     const body = page.locator("body");
-    await expect(body).toHaveClass(/bg-gray-900/);
-    await expect(body).toHaveClass(/text-white/);
+    await expect(body).toHaveClass(/bg-background/);
+    await expect(body).toHaveClass(/text-foreground/);
 
     // Check title exists and is visible
     const title = page.getByText("GitHub UI Clone");
@@ -34,9 +34,9 @@ test.describe("CSS Validation Tests", () => {
       return window.getComputedStyle(document.body).backgroundColor;
     });
 
-    // Should be a dark color (either RGB or OKLCH format)
+    // Should be a dark color in the Dracula theme (oklch format is used)
     console.log("Body background color:", bodyBgColor);
-    expect(bodyBgColor).toMatch(/rgb\(13, 17, 23\)|#0d1117|oklch\([^)]+\)/i);
+    expect(bodyBgColor).toMatch(/rgb\(40, 42, 54\)|#282a36|oklch\([^)]+\)/i);
 
     // Verify the page layout and styling without screenshot comparison
     const elements = await page.evaluate(() => {
@@ -65,8 +65,8 @@ test.describe("CSS Validation Tests", () => {
   }) => {
     await page.goto("/");
 
-    // Check specific Tailwind classes are working
-    const container = page.locator(".bg-gray-900\\/80").first();
+    // Check specific semantic classes are working instead of hardcoded ones
+    const container = page.locator(".bg-card").first();
     await expect(container).toBeVisible();
 
     const formContainer = await container.evaluate((el) => {

@@ -11,10 +11,10 @@ test.describe("Login Page UI Tests", () => {
     const html = page.locator("html");
     await expect(html).toHaveClass(/dark/);
 
-    // Check body has dark background
+    // Check body has dark background using semantic tokens
     const body = page.locator("body");
-    await expect(body).toHaveClass(/bg-gray-900/);
-    await expect(body).toHaveClass(/text-white/);
+    await expect(body).toHaveClass(/bg-background/);
+    await expect(body).toHaveClass(/text-foreground/);
 
     // Check main title is visible and properly styled (CardTitle renders as div, not heading)
     const title = page.getByText("GitHub UI Clone");
@@ -22,30 +22,30 @@ test.describe("Login Page UI Tests", () => {
     await expect(title).toHaveClass(/text-2xl/);
     await expect(title).toHaveClass(/font-bold/);
 
-    // Check login form container
-    const formContainer = page.locator(".bg-gray-900\\/80").first();
+    // Check login form container - using semantic card styles
+    const formContainer = page.locator(".bg-card").first();
     await expect(formContainer).toBeVisible();
     await expect(formContainer).toHaveClass(/shadow-2xl/);
 
-    // Check input field styling (labeled as 'Personal Access Token')
+    // Check input field styling (labeled as 'Personal Access Token') - using semantic tokens
     const tokenInput = page.getByRole("textbox", {
       name: "Personal Access Token",
     });
     await expect(tokenInput).toBeVisible();
-    await expect(tokenInput).toHaveClass(/bg-gray-800/);
-    await expect(tokenInput).toHaveClass(/border-gray-600/);
-    await expect(tokenInput).toHaveClass(/text-white/);
+    await expect(tokenInput).toHaveClass(/bg-input/);
+    await expect(tokenInput).toHaveClass(/border-border/);
+    await expect(tokenInput).toHaveClass(/text-foreground/);
 
     // Check login button styling
     const loginButton = page.getByRole("button", { name: "Connect to GitHub" });
     await expect(loginButton).toBeVisible();
 
-    // Check link styling
+    // Check link styling using semantic tokens
     const githubLink = page.getByRole("link", {
       name: "github.com/settings/tokens",
     });
     await expect(githubLink).toBeVisible();
-    await expect(githubLink).toHaveClass(/text-blue-400/);
+    await expect(githubLink).toHaveClass(/text-accent/);
   });
 
   test("should have proper responsive design on mobile", async ({ page }) => {
@@ -87,10 +87,10 @@ test.describe("Login Page UI Tests", () => {
     await loginButton.focus();
     await expect(loginButton).toBeFocused();
 
-    // Check proper labels are associated
+    // Check proper labels are associated - using semantic tokens
     const label = page.locator('label[for="token"]');
     await expect(label).toBeVisible();
-    await expect(label).toHaveClass(/text-gray-300/);
+    await expect(label).toHaveClass(/text-foreground/);
   });
 
   test("should have consistent color scheme throughout", async ({ page }) => {
