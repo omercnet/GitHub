@@ -28,7 +28,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "iron-session": "^8.0.3",
+    "iron-session": "^9.0.0",
     "js-yaml": "^4.1.0",
     "lucide-react": "^0.536.0",
     "next": "15.4.7",
